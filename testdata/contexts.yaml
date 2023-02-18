@@ -1,0 +1,12 @@
+contexts:
+- name: blue
+  context:
+    cluster: blue-cluster
+    namespace: team-a
+    user: John
+
+- name: green
+  context:
+    cluster: green-cluster
+    namespace: team-b
+    user: Bart

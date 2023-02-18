@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Config
+
+clusters:
+  - cluster:
+      server: https://cluster-2.domain.org/
+      certificate-authority-data: data2
+    name: cluster-2
+
+users:
+  - user:
+      client-key-data: userdata2
+    name: jim
+
+contexts:
+  - context:
+      cluster: cluster-2
+      user: jim
+    name: cluster-2

@@ -1,0 +1,51 @@
+apiVersion: v1
+kind: Config
+
+clusters:
+- name: blue-cluster
+  cluster:
+    server: https://blue.cluster.com/api
+    certificate-authority-data: DATA
+- name: green-cluster
+  cluster:
+    server: https://green.cluster.com/api
+    certificate-authority-data: DATA
+- name: red-cluster
+  cluster:
+    server: https://green.cluster.com/api
+    certificate-authority-data: DATA
+
+
+users:
+- name: John
+  user:
+    client-certificate-data: "d1"
+    client-key-data: "k1"
+- name: Bart
+  user:
+    client-certificate-data: d2
+    client-key-data: k2
+- name: Jimmy
+  user:
+    client-certificate-data: d3
+    client-key-data: k3
+
+
+contexts:
+- name: blue
+  context:
+    cluster: blue-cluster
+    namespace: team-a
+    user: John
+
+- name: green
+  context:
+    cluster: green-cluster
+    namespace: team-b
+    user: Bart
+
+- name: red
+  context:
+    cluster: red-cluster
+    namespace: team-c
+    user: Jimmy
