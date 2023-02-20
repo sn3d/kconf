@@ -1,6 +1,6 @@
 module github.com/sn3d/kconf
 
-go 1.19
+go 1.20
 
 require (
 	github.com/urfave/cli/v2 v2.24.3
