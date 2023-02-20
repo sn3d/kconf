@@ -24,5 +24,12 @@ changelog:
       - '^chore:'
       - '^refactor:'
 
+archives:
+  - name_template: >-
+      {{ .ProjectName }}_
+      {{- title .Os }}_
+      {{- if eq .Arch "darwin" }}macOS
+      {{- else }}{{ .Arch }}{{ end }}
+
 release:
   name_template: "{{.ProjectName}}-v{{.Version}}"
