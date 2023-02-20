@@ -15,10 +15,6 @@ builds:
     ldflags:
       - -X 'main.version={{.Version}}'
 
-archives:
-  - replacements:
-      darwin: macOS
-
 changelog:
   sort: asc
   filters:
