@@ -25,11 +25,7 @@ changelog:
       - '^refactor:'
 
 archives:
-  - name_template: >-
-      {{ .ProjectName }}_
-      {{- title .Os }}_
-      {{- if eq .Arch "darwin" }}macOS
-      {{- else }}{{ .Arch }}{{ end }}
+  - name_template: '{{ .ProjectName }}_{{ if eq .Os "darwin" }}macOS{{ else }}{{ .Os }}{{ end }}_{{ .Arch }}'
 
 release:
-  name_template: "{{.ProjectName}}-v{{.Version}}"
+  name_template: '{{ .ProjectName }}-v{{ .Version }}'
