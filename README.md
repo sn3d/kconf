@@ -12,16 +12,30 @@ can use UNIX piping, or I can copy&paste new cluster context into.
 
 I wrote this tool for myself, to releave pains with context manipulation.
 
-## How to
+## How to-s
 
-- how to import a new context into your existing `KUBECONFIG` 
-file
+- how to import a new cluster from existing file to your `KUBECONFIG` file
+
+```
+cat ./new-cluster.yaml | kconf import 
+```
+
+- how to import a new cluster context into your existing `KUBECONFIG` 
+file as one-liner.
 
 ```
 kconf import << EOF
 apiVersion: v1
 kind: Config
-...
+clusters:
+- cluster:
+  ...
+users:
+- name:
+  ...
+contexts:
+- context: 
+  ...
 EOF
 ```
 
