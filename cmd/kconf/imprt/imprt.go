@@ -10,15 +10,15 @@ import (
 
 var Cmd = &cli.Command{
 	Name:  "import",
-	Usage: "Import given kubeconfig on stdin to your configuration",
+	Usage: "import given kubeconfig on stdin to your configuration",
 	Flags: []cli.Flag{
 		&cli.StringFlag{
 			Name:  "kubeconfig",
-			Usage: "path to kubeconfig where to import",
+			Usage: "path to the dest. kubeconfig where context is imported",
 		},
 		&cli.BoolFlag{
 			Name:  "base64",
-			Usage: "Use if your input is base64 decoded kubeconfig",
+			Usage: "if your input is base64 decoded kubeconfig",
 		},
 	},
 

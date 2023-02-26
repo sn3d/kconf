@@ -17,7 +17,7 @@ func main() {
 	app := &cli.App{
 		Name:    "kconf",
 		Version: version,
-		Usage:   "Managing your kubeconfig",
+		Usage:   "managing your kubeconfig",
 		Commands: []*cli.Command{
 			imprt.Cmd,
 			export.Cmd,

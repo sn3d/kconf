@@ -7,7 +7,7 @@ import (
 
 var Cmd = &cli.Command{
 	Name:      "rm",
-	Usage:     "Remove context and context's cluster and user (if it's possible)",
+	Usage:     "remove context and context's cluster and user (if it's possible)",
 	ArgsUsage: "[contextName]",
 	Flags: []cli.Flag{
 		&cli.StringFlag{

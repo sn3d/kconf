@@ -14,7 +14,7 @@ var Cmd = &cli.Command{
 	Flags: []cli.Flag{
 		&cli.StringFlag{
 			Name:  "kubeconfig",
-			Usage: "path to kubeconfig from where export context",
+			Usage: "path to the kubeconfig file from where context is exported",
 		},
 	},
 
