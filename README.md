@@ -60,13 +60,13 @@ But it's simple binary file which can be easily installed by downloading.
 You can install excav with curl or get with those one-liners:
 
 ```
-curl -s https://installme.sh/sn3d/excav | sh
+curl -s https://installme.sh/sn3d/kconf | sh
 ```
 
 or 
 
 ```
-wget -q -O - https://installme.sh/sn3d/excav | sh
+wget -q -O - https://installme.sh/sn3d/kconf | sh
 
 ```
 
