@@ -12,16 +12,15 @@ can use UNIX piping, or I can copy&paste new cluster context into.
 
 I wrote this tool for myself, to releave pains with context manipulation.
 
-## How to-s
+## How to
 
-- how to import a new cluster from existing file to your `KUBECONFIG` file
+- import a cluster from existing file to your `KUBECONFIG` file
 
 ```
 cat ./new-cluster.yaml | kconf import 
 ```
 
-- how to import a new cluster context into your existing `KUBECONFIG` 
-file as one-liner.
+- import a new cluster context into your `KUBECONFIG` file
 
 ```
 kconf import << EOF
@@ -39,8 +38,7 @@ contexts:
 EOF
 ```
 
-- how to import base64 decoded context into your existing 
-kubeconfig
+- import a base64 decoded context to specific file
 
 ```
 kconf import --base64 --kubeconfig=/path/to/kube.conf << EOF
@@ -51,13 +49,13 @@ i1uYW1lPg==
 EOF
 ```
 
-- how to export full context from your `KUBECONFIG` file
+- export a full context (with user and cluster) from your `KUBECONFIG` file
 
 ```
 kconf export your-k8s-cluster >> ./your-k8s-cluster.conf
 ```
 
-- how to remove full context (with user and cluster) from your
+- remove a full context (with user and cluster) from your
 `KUBECONFIG` file
 
 ```
