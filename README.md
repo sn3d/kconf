@@ -59,15 +59,14 @@ But it's simple binary file which can be easily installed by downloading.
 
 You can install excav with curl or get with those one-liners:
 
-```
+```bash
 curl -s https://installme.sh/sn3d/kconf | sh
 ```
 
 or 
 
-```
+```bash
 wget -q -O - https://installme.sh/sn3d/kconf | sh
-
 ```
 
 ### Windows
