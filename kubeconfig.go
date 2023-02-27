@@ -85,6 +85,7 @@ func (cfg *KubeConfig) Import(src *KubeConfig) {
 func (cfg *KubeConfig) Export(contextName string) (*KubeConfig, error) {
 
 	exportedKubeConfig := New()
+	exportedKubeConfig.CurrentContext = contextName
 
 	for _, ctx := range cfg.Contexts {
 		if ctx.Name == contextName {
