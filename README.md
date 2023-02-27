@@ -85,3 +85,8 @@ wget -q -O - https://installme.sh/sn3d/kconf | sh
 
 Download the correct binary for your platform from [project's GitHub](https://github.com/sn3d/kconf/releases/). 
 Uncompress the binary to you PATH.
+
+# Feedback & Bugs
+
+Feedback is more than welcome. Did you found a bug? Is something not behaving as expected? Feature or bug, feel free to create [issue](https://github.com/sn3d/kconf/issues).
+
