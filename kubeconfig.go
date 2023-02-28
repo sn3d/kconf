@@ -14,7 +14,7 @@ import (
 type KubeConfig struct {
 	ApiVersion     string       `yaml:"apiVersion"`
 	Kind           string       `yaml:"kind"`
-	CurrentContext string       `yaml:"current-context`
+	CurrentContext string       `yaml:"current-context"`
 	Clusters       []ClusterElm `yaml:"clusters",omitempty`
 	Users          []UserElm    `yaml:"users",omitempty`
 	Contexts       []ContextElm `yaml:"contexts",omitempty`
