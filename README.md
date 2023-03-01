@@ -1,5 +1,8 @@
 # `kconf`: kubeconfigs easily
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/sn3d/kconf)](https://goreportcard.com/report/github.com/sn3d/kconf)
+[![codebeat badge](https://codebeat.co/badges/4d9db5e8-918f-4561-a9de-5c27c1f509ad)](https://codebeat.co/projects/github-com-sn3d-kconf-main)
+
 The `kconf` helps you with kubeconfigs.
 
 One of the annoying operations with `KUBECONFIG` for me is merging a new cluster
