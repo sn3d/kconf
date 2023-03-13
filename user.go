@@ -9,5 +9,6 @@ type UserElm struct {
 		ClientKeyData         string `yaml:"client-key-data",omitempty`
 		ClientCertificate     string `yaml:"client-certificate",omitempty`
 		ClientCertificateData string `yaml:"client-certificate-data",omitempty`
+		Token                 string `yaml:"token"`
 	} `yaml:"user",omitempty`
 }
