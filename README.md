@@ -77,7 +77,7 @@ The subcommand `kconf ls` will print you all contexts in your `KUBECONFIG`
 file. Also it supports `-l` flag which print all contexts in long listed 
 format.
 
-```
+```shell
 $ kconf ls -l                                                                                                                                     
 CONTEXT          CLUSTER          USER             NAMESPACE
 kind-cluster1    kind-cluster1    kind-cluster1    mytest
@@ -89,7 +89,7 @@ With `mv` command, you can rename any context with his user and cluster.
 That means not only context will change the name, but also user and cluster
 will be named by context
 
-```
+```shell
 $ kconf mv blue cyan
 $ kconf ls -l
 CONTEXT          CLUSTER          USER             NAMESPACE
@@ -101,7 +101,7 @@ cyan             cyan             cyan             default
 And last but not least is `rm`. This commant will remove context with 
 associated user and cluster.
 
-```
+```shell
 $ kconf rm rancher-desktop
 $ kconf ls -l                                                                                                                                     
 CONTEXT          CLUSTER          USER             NAMESPACE
