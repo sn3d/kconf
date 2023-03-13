@@ -100,3 +100,45 @@ func Test_RemoveContext(t *testing.T) {
 		t.FailNow()
 	}
 }
+
+func Test_RenameContet(t *testing.T) {
+	kcfg, err := OpenFile("testdata/big.yaml")
+	if err != nil {
+		t.FailNow()
+	}
+
+	kcfg.RenameContext("blue", "cyan")
+
+	// blue resources (context, user, cluster) should not exist
+	idx := kcfg.findContext("blue")
+	if idx >= 0 {
+		t.FailNow()
+	}
+
+	idx = kcfg.findUser("blue")
+	if idx >= 0 {
+		t.FailNow()
+	}
+
+	idx = kcfg.findCluster("blue")
+	if idx >= 0 {
+		t.FailNow()
+	}
+
+	// 'cyan' resource (contex, user, cluster) must exist
+	idx = kcfg.findContext("cyan")
+	if idx < 0 {
+		t.FailNow()
+	}
+
+	idx = kcfg.findUser("cyan")
+	if idx < 0 {
+		t.FailNow()
+	}
+
+	idx = kcfg.findCluster("cyan")
+	if idx < 0 {
+		t.FailNow()
+	}
+
+}

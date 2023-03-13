@@ -167,40 +167,74 @@ func getDefaultKubeConfig() string {
 
 // RemoveContext by his name
 func (cfg *KubeConfig) RemoveContext(context string) {
-	idx := -1
-	var user string
-	var cluster string
-	for i, ctx := range cfg.Contexts {
-		if ctx.Name == context {
-			cluster = ctx.Context.Cluster
-			user = ctx.Context.User
-			idx = i
-			break
-		}
-	}
 
-	// not found
-	if idx == -1 {
+	// find and remove context
+	idx := cfg.findContext(context)
+	if idx < 0 {
 		return
 	}
 
+	user := cfg.Contexts[idx].Context.User
+	cluster := cfg.Contexts[idx].Context.Cluster
+
 	cfg.removeFromContexts(idx)
 
-	// find and remove user
-	for i, usr := range cfg.Users {
-		if usr.Name == user {
-			cfg.removeFromUsers(i)
-			break
-		}
+	// find and remove context's user
+	idx = cfg.findUser(user)
+	if idx >= 0 {
+		cfg.removeFromUsers(idx)
 	}
 
-	// find and remove cluster
-	for i, clst := range cfg.Clusters {
-		if clst.Name == cluster {
-			cfg.removeFromClusters(i)
-			break
+	// find and remove context's cluster
+	idx = cfg.findCluster(cluster)
+	if idx >= 0 {
+		cfg.removeFromClusters(idx)
+	}
+}
+
+// Rename source context to dest contex
+func (cfg *KubeConfig) RenameContext(source, dest string) {
+
+	// find context and rename it
+	idx := cfg.findContext(source)
+	if idx < 0 {
+		return
+	}
+
+	context := cfg.Contexts[idx]
+	context.Name = dest
+	cfg.removeFromContexts(idx)
+
+	// rename user
+	idx = cfg.findUser(context.Context.User)
+	if idx >= 0 {
+		user := cfg.Users[idx]
+		user.Name = dest
+		context.Context.User = dest
+		cfg.removeFromUsers(idx)
+		cfg.Users = append(cfg.Users, user)
+	}
+
+	// rename cluster
+	idx = cfg.findCluster(context.Context.Cluster)
+	if idx >= 0 {
+		cluster := cfg.Clusters[idx]
+		cluster.Name = dest
+		context.Context.Cluster = dest
+		cfg.removeFromClusters(idx)
+		cfg.Clusters = append(cfg.Clusters, cluster)
+	}
+
+	cfg.Contexts = append(cfg.Contexts, context)
+}
+
+func (cfg *KubeConfig) findContext(name string) int {
+	for i, ctx := range cfg.Contexts {
+		if ctx.Name == name {
+			return i
 		}
 	}
+	return -1
 }
 
 func (cfg *KubeConfig) removeFromContexts(idx int) {
@@ -210,12 +244,30 @@ func (cfg *KubeConfig) removeFromContexts(idx int) {
 	cfg.Contexts = s
 }
 
+func (cfg *KubeConfig) findUser(name string) int {
+	for i, usr := range cfg.Users {
+		if usr.Name == name {
+			return i
+		}
+	}
+	return -1
+}
+
 func (cfg *KubeConfig) removeFromUsers(idx int) {
 
 	s := cfg.Users
 	s[idx] = s[len(s)-1] // Copy last element to index i.
 	s = s[:len(s)-1]     // Truncate slice.
 	cfg.Users = s
+}
+
+func (cfg *KubeConfig) findCluster(name string) int {
+	for i, clst := range cfg.Clusters {
+		if clst.Name == name {
+			return i
+		}
+	}
+	return -1
 }
 
 func (cfg *KubeConfig) removeFromClusters(idx int) {

@@ -6,6 +6,8 @@ import (
 
 	"github.com/sn3d/kconf/cmd/kconf/export"
 	"github.com/sn3d/kconf/cmd/kconf/imprt"
+	"github.com/sn3d/kconf/cmd/kconf/ls"
+	"github.com/sn3d/kconf/cmd/kconf/mv"
 	"github.com/sn3d/kconf/cmd/kconf/rm"
 	"github.com/urfave/cli/v2"
 )
@@ -22,6 +24,8 @@ func main() {
 			imprt.Cmd,
 			export.Cmd,
 			rm.Cmd,
+			mv.Cmd,
+			ls.Cmd,
 		},
 	}
 
