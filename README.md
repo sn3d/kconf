@@ -15,7 +15,7 @@ can use UNIX piping, or I can copy&paste new cluster context into.
 
 I wrote this tool for myself, to relive pains with context manipulation.
 
-## How to
+## Import and Export
 
 - import a cluster from existing file to your `KUBECONFIG` file
 
@@ -63,6 +63,50 @@ kconf export your-k8s-cluster >> ./your-k8s-cluster.conf
 
 ```shell
 kconf rm your-k8s-cluster
+```
+
+## Basic manipulation
+
+I'm using `kconf` more and more for manipulation with contexts in kubeconfig.
+I've implemented few more simple but useful functionalities like `mv`, `rm` 
+and `ls`. These subcommands are well known in Unix world and they're manipulating
+with contexts same was as Unix commands with files.
+
+
+The subcommand `kconf ls` will print you all contexts in your `KUBECONFIG` 
+file. Also it supports `-l` flag which print all contexts in long listed 
+format.
+
+```
+$ kconf ls -l                                                                                                                                     
+CONTEXT          CLUSTER          USER             NAMESPACE
+kind-cluster1    kind-cluster1    kind-cluster1    mytest
+rancher-desktop  rancher-desktop  rancher-desktop
+blue             blue-cluster     john             default
+```
+
+With `mv` command, you can rename any context with his user and cluster. 
+That means not only context will change the name, but also user and cluster
+will be named by context
+
+```
+$ kconf mv blue cyan
+$ kconf ls -l
+CONTEXT          CLUSTER          USER             NAMESPACE
+kind-cluster1    kind-cluster1    kind-cluster1    mytest
+rancher-desktop  rancher-desktop  rancher-desktop
+cyan             cyan             cyan             default
+```
+
+And last but not least is `rm`. This commant will remove context with 
+associated user and cluster.
+
+```
+$ kconf rm rancher-desktop
+$ kconf ls -l                                                                                                                                     
+CONTEXT          CLUSTER          USER             NAMESPACE
+kind-cluster1    kind-cluster1    kind-cluster1    mytest
+cyan             cyan             cyan             default
 ```
 
 ## Installation
