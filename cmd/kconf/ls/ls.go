@@ -39,7 +39,7 @@ var Cmd = &cli.Command{
 		}
 
 		if err != nil {
-			return err
+			fmt.Printf("Cannot open your kubeconfig. Check if you have KUBECONFIG env. variable defined, or use --kubeconfig.\n")
 		}
 
 		w := tabwriter.NewWriter(os.Stdout, 5, 2, 2, ' ', tabwriter.DiscardEmptyColumns)
