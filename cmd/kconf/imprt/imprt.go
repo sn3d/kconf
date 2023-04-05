@@ -3,6 +3,7 @@ package imprt
 import (
 	"io"
 	"os"
+	"strings"
 
 	"github.com/sn3d/kconf"
 	"github.com/urfave/cli/v2"
@@ -28,12 +29,12 @@ var Cmd = &cli.Command{
 		var err error
 
 		kubeConfigFile := cCtx.String("kubeconfig")
-		if kubeConfigFile != "" {
-			kc, err = kconf.OpenFile(kubeConfigFile)
-		} else {
-			kc, err = kconf.OpenDefault()
+		if kubeConfigFile == "" {
+			configs := strings.Split(os.Getenv("KUBECONFIG"), ":")
+			kubeConfigFile = configs[0]
 		}
 
+		kc, err = kconf.Open(kubeConfigFile)
 		if err != nil {
 			return err
 		}
@@ -53,7 +54,7 @@ var Cmd = &cli.Command{
 		if cCtx.Bool("base64") {
 			sourceCfg, err = kconf.OpenBase64(data)
 		} else {
-			sourceCfg, err = kconf.Open(data)
+			sourceCfg, err = kconf.OpenData(data)
 		}
 
 		if err != nil {
@@ -61,12 +62,8 @@ var Cmd = &cli.Command{
 		}
 
 		kc.Import(sourceCfg)
-		if kubeConfigFile != "" {
-			err = kc.Save(kubeConfigFile)
-		} else {
-			err = kc.SaveDefault()
-		}
 
+		err = kc.Save(kubeConfigFile)
 		if err != nil {
 			return err
 		}

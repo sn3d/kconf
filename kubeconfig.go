@@ -3,53 +3,56 @@ package kconf
 import (
 	"encoding/base64"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
-	"path/filepath"
 	"strings"
 
-	"gopkg.in/yaml.v3"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	apilatest "k8s.io/client-go/tools/clientcmd/api/latest"
+	apiv1 "k8s.io/client-go/tools/clientcmd/api/v1"
 )
 
 type KubeConfig struct {
-	ApiVersion     string       `yaml:"apiVersion"`
-	Kind           string       `yaml:"kind"`
-	CurrentContext string       `yaml:"current-context"`
-	Clusters       []ClusterElm `yaml:"clusters",omitempty`
-	Users          []UserElm    `yaml:"users",omitempty`
-	Contexts       []ContextElm `yaml:"contexts",omitempty`
+	*apiv1.Config
 }
 
-// NewKubeConfig creates empty config with pre-filled kind and version
 func New() *KubeConfig {
-	cfg := new(KubeConfig)
-	cfg.ApiVersion = "v1"
-	cfg.Kind = "Config"
-	return cfg
+	return &KubeConfig{
+		Config: &apiv1.Config{
+			Kind:       "Config",
+			APIVersion: "v1",
+			AuthInfos:  make([]apiv1.NamedAuthInfo, 0),
+			Clusters:   make([]apiv1.NamedCluster, 0),
+			Contexts:   make([]apiv1.NamedContext, 0),
+			Preferences: apiv1.Preferences{
+				Extensions: make([]apiv1.NamedExtension, 0),
+			},
+		},
+	}
 }
 
-// OpenDefault load kubeconfig data from file defined in
-// KUBECONFIG env. variable. Because KUBECONFIG might contain
-// multiple files, we took the first file
-func OpenDefault() (*KubeConfig, error) {
-	filename := getDefaultKubeConfig()
-	return OpenFile(filename)
-}
+// load data from given file and parse them into
+// KubeConfig instance. If file is not set (empty string),
+// the function will load and parse first kubeconfig in
+// KUBECONFIG env. variable.
+func Open(file string) (*KubeConfig, error) {
+	if file == "" {
+		envValue := os.Getenv("KUBECONFIG")
+		configs := strings.Split(envValue, ":")
+		file = configs[0]
+	}
 
-// OpenKubeConfigFile load data from file and parse them into
-// KubeConfig instance.
-func OpenFile(file string) (*KubeConfig, error) {
-	filename, _ := filepath.Abs(file)
-	yamlData, err := ioutil.ReadFile(filename)
+	data, err := os.ReadFile(file)
 	if err != nil {
 		return nil, err
 	}
-	return Open(yamlData)
+
+	return OpenData(data)
 }
 
 // OpenBase64 will decode input data from base64 and parse it
 func OpenBase64(b64Data []byte) (*KubeConfig, error) {
-	// we need to deal with data as string because sometimes
+	// I need to deal with data as string because sometimes
 	// from stdin we get weird bytes on end of buffer and YAML
 	// cannot be parsed. I'm converting it to string and decode
 	// as string. This ensure the decoded YAML can be parsed.
@@ -59,220 +62,91 @@ func OpenBase64(b64Data []byte) (*KubeConfig, error) {
 	if err != nil {
 		return nil, err
 	}
-	return Open([]byte(encodedData))
+	return OpenData([]byte(encodedData))
 }
 
-// OpenKubeConfig will parse data and returns you KubeConfig instance
-func Open(data []byte) (*KubeConfig, error) {
-	cfg := New()
-	err := yaml.Unmarshal(data, cfg)
+// parse given data as YAML into new KubeConfig
+func OpenData(data []byte) (*KubeConfig, error) {
+	cfg := &apiv1.Config{}
+	_, _, err := apilatest.Codec.Decode(data, &schema.GroupVersionKind{
+		Group:   "",
+		Version: "v1",
+		Kind:    "Config",
+	}, cfg)
+
 	if err != nil {
 		return nil, err
+	} else {
+		return &KubeConfig{Config: cfg}, nil
 	}
-	return cfg, nil
+}
+
+func (c *KubeConfig) Save(filename string) error {
+	fd, err := os.Create(filename)
+	if err != nil {
+		return err
+	}
+	defer fd.Close()
+	return c.WriteTo(fd)
+}
+
+func (c *KubeConfig) WriteTo(w io.Writer) error {
+	err := apilatest.Codec.Encode(c.Config, w)
+	if err != nil {
+		return err
+	} else {
+		return nil
+	}
 }
 
 // Import all users, contexts and clusters from src kubeconfig
 // to current kubeconfig
-func (cfg *KubeConfig) Import(src *KubeConfig) {
-	cfg.Users = append(cfg.Users, src.Users...)
-	cfg.Contexts = append(cfg.Contexts, src.Contexts...)
-	cfg.Clusters = append(cfg.Clusters, src.Clusters...)
+func (c *KubeConfig) Import(src *KubeConfig) {
+	c.addToContexts(src.Contexts...)
+	c.addToClusters(src.Clusters...)
+	c.addToUsers(src.AuthInfos...)
 }
 
 // Export returns you new KubeConfig where is given context
 // with required User and Cluster.
 func (cfg *KubeConfig) Export(contextName string) (*KubeConfig, error) {
-
-	exportedKubeConfig := New()
-	exportedKubeConfig.CurrentContext = contextName
-
-	for _, ctx := range cfg.Contexts {
-		if ctx.Name == contextName {
-			exportedKubeConfig.Contexts = []ContextElm{ctx}
-			break
-		}
+	exported := New()
+	exported.CurrentContext = contextName
+	ctx, cluster, user := cfg.getFullContext(contextName)
+	if ctx == nil {
+		return exported, fmt.Errorf("the '%s' is missing in kubeconfig", contextName)
 	}
 
-	if len(exportedKubeConfig.Contexts) == 0 {
-		return nil, fmt.Errorf("context '%s' not found", contextName)
-	}
+	exported.addToContexts(*ctx)
+	exported.addToClusters(*cluster)
+	exported.addToUsers(*user)
 
-	// get user
-	usrName := exportedKubeConfig.Contexts[0].Context.User
-	for _, usr := range cfg.Users {
-		if usr.Name == usrName {
-			exportedKubeConfig.Users = []UserElm{usr}
-			break
-		}
-	}
-
-	// get cluster
-	clusterName := exportedKubeConfig.Contexts[0].Context.Cluster
-	for _, cluster := range cfg.Clusters {
-		if cluster.Name == clusterName {
-			exportedKubeConfig.Clusters = []ClusterElm{cluster}
-		}
-	}
-
-	return exportedKubeConfig, nil
+	return exported, nil
 }
 
-// SaveDefault store the given KubeConfig into file defined
-// in KUBECONFIG env. variable.
-func (cfg *KubeConfig) SaveDefault() error {
-	filename := getDefaultKubeConfig()
-	return cfg.Save(filename)
-}
-
-// Save write KubeConfig's YAML into file. If given file is
-// empty string, then it's saved into existing config in KUBECONFIG
-func (cfg *KubeConfig) Save(file string) error {
-	data, err := yaml.Marshal(cfg)
-	if err != nil {
-		return err
-	}
-
-	if file == "" {
-		file = getDefaultKubeConfig()
-	}
-
-	err = ioutil.WriteFile(file, data, 0)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// ToString render KubeConfig YAML as string
-func (cfg *KubeConfig) ToString() string {
-	data, err := yaml.Marshal(cfg)
-	if err != nil {
-		return err.Error()
-	} else {
-		return string(data)
-	}
-}
-
-// getDefaultKubeConfig parse KUBECONFIG and returns you
-// path to first kubeconfig. We need to parse it because
-// KUBECONFIG env. variable might contain multiple config
-// files.
-func getDefaultKubeConfig() string {
-	envValue := os.Getenv("KUBECONFIG")
-	configs := strings.Split(envValue, ":")
-	return configs[0]
-}
-
-// RemoveContext by his name
-func (cfg *KubeConfig) RemoveContext(context string) {
-
-	// find and remove context
-	idx := cfg.findContext(context)
-	if idx < 0 {
+// completely remove context by name and context's
+// cluster and user
+func (c *KubeConfig) Remove(contextName string) {
+	ctx := c.getContext(contextName)
+	if ctx == nil {
 		return
 	}
 
-	user := cfg.Contexts[idx].Context.User
-	cluster := cfg.Contexts[idx].Context.Cluster
-
-	cfg.removeFromContexts(idx)
-
-	// find and remove context's user
-	idx = cfg.findUser(user)
-	if idx >= 0 {
-		cfg.removeFromUsers(idx)
-	}
-
-	// find and remove context's cluster
-	idx = cfg.findCluster(cluster)
-	if idx >= 0 {
-		cfg.removeFromClusters(idx)
-	}
+	c.removeFromClusters(ctx.Context.Cluster)
+	c.removeFromUsers(ctx.Context.AuthInfo)
+	c.removeFromContexts(contextName)
 }
 
-// Rename source context to dest contex
-func (cfg *KubeConfig) RenameContext(source, dest string) {
-
-	// find context and rename it
-	idx := cfg.findContext(source)
-	if idx < 0 {
+// rename context and context's cluster and user. Both
+// cluster and user will have name same as is new name
+// of context
+func (c *KubeConfig) Rename(src, dest string) {
+	ctx := c.getContext(src)
+	if ctx == nil {
 		return
 	}
 
-	context := cfg.Contexts[idx]
-	context.Name = dest
-	cfg.removeFromContexts(idx)
-
-	// rename user
-	idx = cfg.findUser(context.Context.User)
-	if idx >= 0 {
-		user := cfg.Users[idx]
-		user.Name = dest
-		context.Context.User = dest
-		cfg.removeFromUsers(idx)
-		cfg.Users = append(cfg.Users, user)
-	}
-
-	// rename cluster
-	idx = cfg.findCluster(context.Context.Cluster)
-	if idx >= 0 {
-		cluster := cfg.Clusters[idx]
-		cluster.Name = dest
-		context.Context.Cluster = dest
-		cfg.removeFromClusters(idx)
-		cfg.Clusters = append(cfg.Clusters, cluster)
-	}
-
-	cfg.Contexts = append(cfg.Contexts, context)
-}
-
-func (cfg *KubeConfig) findContext(name string) int {
-	for i, ctx := range cfg.Contexts {
-		if ctx.Name == name {
-			return i
-		}
-	}
-	return -1
-}
-
-func (cfg *KubeConfig) removeFromContexts(idx int) {
-	s := cfg.Contexts
-	s[idx] = s[len(s)-1] // Copy last element to index i.
-	s = s[:len(s)-1]     // Truncate slice.
-	cfg.Contexts = s
-}
-
-func (cfg *KubeConfig) findUser(name string) int {
-	for i, usr := range cfg.Users {
-		if usr.Name == name {
-			return i
-		}
-	}
-	return -1
-}
-
-func (cfg *KubeConfig) removeFromUsers(idx int) {
-
-	s := cfg.Users
-	s[idx] = s[len(s)-1] // Copy last element to index i.
-	s = s[:len(s)-1]     // Truncate slice.
-	cfg.Users = s
-}
-
-func (cfg *KubeConfig) findCluster(name string) int {
-	for i, clst := range cfg.Clusters {
-		if clst.Name == name {
-			return i
-		}
-	}
-	return -1
-}
-
-func (cfg *KubeConfig) removeFromClusters(idx int) {
-	s := cfg.Clusters
-	s[idx] = s[len(s)-1] // Copy last element to index i.
-	s = s[:len(s)-1]     // Truncate slice.
-	cfg.Clusters = s
+	c.renameCluster(ctx.Context.Cluster, dest)
+	c.renameUser(ctx.Context.AuthInfo, dest)
+	c.renameContext(src, dest)
 }

@@ -1,6 +1,9 @@
 package rm
 
 import (
+	"os"
+	"strings"
+
 	"github.com/sn3d/kconf"
 	"github.com/urfave/cli/v2"
 )
@@ -19,29 +22,24 @@ var Cmd = &cli.Command{
 	// main entry point for 'export'
 	Action: func(cCtx *cli.Context) error {
 		contextName := cCtx.Args().First()
-		kubeConfigPath := cCtx.String("kubeconfig")
+
+		kubeConfigFile := cCtx.String("kubeconfig")
+		if kubeConfigFile == "" {
+			configs := strings.Split(os.Getenv("KUBECONFIG"), ":")
+			kubeConfigFile = configs[0]
+		}
 
 		var kc *kconf.KubeConfig
 		var err error
 
-		if kubeConfigPath == "" {
-			kc, err = kconf.OpenDefault()
-		} else {
-			kc, err = kconf.OpenFile(kubeConfigPath)
-		}
-
+		kc, err = kconf.Open(kubeConfigFile)
 		if err != nil {
 			return err
 		}
 
-		kc.RemoveContext(contextName)
+		kc.Remove(contextName)
 
-		if kubeConfigPath == "" {
-			err = kc.SaveDefault()
-		} else {
-			err = kc.Save(kubeConfigPath)
-		}
-
+		err = kc.Save(kubeConfigFile)
 		if err != nil {
 			return err
 		}

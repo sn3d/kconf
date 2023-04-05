@@ -4,7 +4,7 @@ kind: Config
 clusters:
   - cluster:
       server: https://cluster-1.domain.org/
-      certificate-authority-data: data1
+      certificate-authority-data: ZGF0YQo=
     name: cluster-1
 
 users:

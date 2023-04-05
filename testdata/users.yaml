@@ -1,9 +1,0 @@
-users:
-- name: u1
-  user:
-    client-certificate-data: "d1"
-    client-key-data: "k1"
-- name: u2
-  user:
-    client-certificate-data: d2
-    client-key-data: k2

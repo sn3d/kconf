@@ -1,7 +1,7 @@
 package export
 
 import (
-	"fmt"
+	"os"
 
 	"github.com/sn3d/kconf"
 	"github.com/urfave/cli/v2"
@@ -26,12 +26,7 @@ var Cmd = &cli.Command{
 		var kc *kconf.KubeConfig
 		var err error
 
-		if kubeConfigPath == "" {
-			kc, err = kconf.OpenDefault()
-		} else {
-			kc, err = kconf.OpenFile(kubeConfigPath)
-		}
-
+		kc, err = kconf.Open(kubeConfigPath)
 		if err != nil {
 			return err
 		}
@@ -41,7 +36,7 @@ var Cmd = &cli.Command{
 			return err
 		}
 
-		fmt.Printf("%s", exportedCfg.ToString())
+		exportedCfg.WriteTo(os.Stdout)
 		return nil
 	},
 }

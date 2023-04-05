@@ -5,30 +5,30 @@ clusters:
 - name: blue-cluster
   cluster:
     server: https://blue.cluster.com/api
-    certificate-authority-data: DATA
+    certificate-authority-data: REFUQQo=
 - name: green-cluster
   cluster:
     server: https://green.cluster.com/api
-    certificate-authority-data: DATA
+    certificate-authority-data: REFUQQo=
 - name: red-cluster
   cluster:
     server: https://green.cluster.com/api
-    certificate-authority-data: DATA
+    certificate-authority-data: REFUQQo=
 
 
 users:
 - name: John
   user:
-    client-certificate-data: "d1"
-    client-key-data: "k1"
+    client-certificate-data: ZDEK
+    client-key-data: azEK
 - name: Bart
   user:
-    client-certificate-data: d2
-    client-key-data: k2
+    client-certificate-data: ZDIK
+    client-key-data: azIK
 - name: Jimmy
   user:
-    client-certificate-data: d3
-    client-key-data: k3
+    client-certificate-data: ZDMK
+    client-key-data: azMK
 
 
 contexts:
