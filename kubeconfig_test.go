@@ -1,25 +1,54 @@
 package kconf
 
 import (
-	"io/ioutil"
+	"fmt"
+	"strings"
 	"testing"
+
+	"github.com/sn3d/testdata"
 )
+
+func Test_Open(t *testing.T) {
+	testdata.Setup()
+
+	cfg, err := Open(testdata.Abs("open-test.yaml"))
+	if err != nil {
+		t.FailNow()
+	}
+
+	fmt.Println(cfg)
+	fmt.Println(cfg.Clusters[0].Cluster.CertificateAuthorityData)
+
+	err = cfg.Save(testdata.Abs("save-test.yaml"))
+	if err != nil {
+		t.FailNow()
+	}
+
+	same := testdata.CompareFiles("save-test.yaml", "save-expected.yaml")
+	if !same {
+		t.FailNow()
+	}
+}
 
 func Test_Import(t *testing.T) {
 
+	testdata.Setup()
+
 	// add configuration 2 into configuration 1
-	cfg1, _ := OpenFile("testdata/cfg1.yaml")
-	cfg2, _ := OpenFile("testdata/cfg2.yaml")
+	cfg1, _ := Open(testdata.Abs("import-1.yaml"))
+	cfg2, _ := Open(testdata.Abs("import-2.yaml"))
 
 	cfg1.Import(cfg2)
+	cfg1.Save(testdata.Abs("import-result.yaml"))
 
 	// validate users
-	users := cfg1.Users
+	users := cfg1.AuthInfos
 	if len(users) != 2 {
 		t.FailNow()
 	}
 
-	if users[1].User.ClientKeyData != "userdata2" {
+	clientKey := strings.TrimRight(string(users[1].AuthInfo.ClientKeyData), "\n")
+	if clientKey != "userdata2" {
 		t.FailNow()
 	}
 
@@ -40,59 +69,21 @@ func Test_Import(t *testing.T) {
 	}
 }
 
-func Test_OpenBase64(t *testing.T) {
-	b64Data, err := ioutil.ReadFile("testdata/b64.yaml")
-	if err != nil {
-		t.FailNow()
-	}
-
-	kcfg, err := OpenBase64(b64Data)
-	if err != nil {
-		t.FailNow()
-	}
-
-	if len(kcfg.Clusters) != 1 {
-		t.FailNow()
-	}
-}
-
-func Test_Export(t *testing.T) {
-	kcfg, err := OpenFile("testdata/big.yaml")
-	if err != nil {
-		t.FailNow()
-	}
-
-	greenCfg, err := kcfg.Export("green")
-	if err != nil {
-		t.FailNow()
-	}
-
-	if greenCfg.Contexts[0].Name != "green" {
-		t.FailNow()
-	}
-
-	if len(greenCfg.Users) != 1 {
-		t.FailNow()
-	}
-
-	if len(greenCfg.Clusters) != 1 {
-		t.FailNow()
-	}
-}
-
 func Test_RemoveContext(t *testing.T) {
-	kcfg, err := OpenFile("testdata/remove.yaml")
+	testdata.Setup()
+
+	kcfg, err := Open(testdata.Abs("remove-test.yaml"))
 	if err != nil {
 		t.FailNow()
 	}
 
-	kcfg.RemoveContext("green")
+	kcfg.Remove("green")
 
 	if len(kcfg.Contexts) != 2 {
 		t.FailNow()
 	}
 
-	if len(kcfg.Users) != 2 {
+	if len(kcfg.AuthInfos) != 2 {
 		t.FailNow()
 	}
 
@@ -102,42 +93,44 @@ func Test_RemoveContext(t *testing.T) {
 }
 
 func Test_RenameContet(t *testing.T) {
-	kcfg, err := OpenFile("testdata/big.yaml")
+	testdata.Setup()
+
+	kcfg, err := Open(testdata.Abs("rename-test.yaml"))
 	if err != nil {
 		t.FailNow()
 	}
 
-	kcfg.RenameContext("blue", "cyan")
+	kcfg.Rename("blue", "cyan")
 
 	// blue resources (context, user, cluster) should not exist
-	idx := kcfg.findContext("blue")
-	if idx >= 0 {
+	ctx := kcfg.getContext("blue")
+	if ctx != nil {
 		t.FailNow()
 	}
 
-	idx = kcfg.findUser("blue")
-	if idx >= 0 {
+	cluster := kcfg.getCluster("blue-cluster")
+	if cluster != nil {
 		t.FailNow()
 	}
 
-	idx = kcfg.findCluster("blue")
-	if idx >= 0 {
+	user := kcfg.getUser("John")
+	if user != nil {
 		t.FailNow()
 	}
 
 	// 'cyan' resource (contex, user, cluster) must exist
-	idx = kcfg.findContext("cyan")
-	if idx < 0 {
+	ctx = kcfg.getContext("cyan")
+	if ctx == nil {
 		t.FailNow()
 	}
 
-	idx = kcfg.findUser("cyan")
-	if idx < 0 {
+	user = kcfg.getUser("cyan")
+	if user == nil {
 		t.FailNow()
 	}
 
-	idx = kcfg.findCluster("cyan")
-	if idx < 0 {
+	cluster = kcfg.getCluster("cyan")
+	if cluster == nil {
 		t.FailNow()
 	}
 

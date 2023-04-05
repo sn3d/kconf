@@ -32,11 +32,7 @@ var Cmd = &cli.Command{
 		var kc *kconf.KubeConfig
 		var err error
 
-		if kubeConfigPath == "" {
-			kc, err = kconf.OpenDefault()
-		} else {
-			kc, err = kconf.OpenFile(kubeConfigPath)
-		}
+		kc, err = kconf.Open(kubeConfigPath)
 
 		if err != nil {
 			fmt.Printf("Cannot open your kubeconfig. Check if you have KUBECONFIG env. variable defined, or use --kubeconfig.\n")
@@ -48,7 +44,7 @@ var Cmd = &cli.Command{
 		}
 		for _, ctx := range kc.Contexts {
 			if longList {
-				fmt.Fprintf(w, "%s\t%s\t%s\t%s\n", ctx.Name, ctx.Context.Cluster, ctx.Context.User, ctx.Context.Namespace)
+				fmt.Fprintf(w, "%s\t%s\t%s\t%s\n", ctx.Name, ctx.Context.Cluster, ctx.Context.AuthInfo, ctx.Context.Namespace)
 			} else {
 				fmt.Fprintf(w, "%s\n", ctx.Name)
 			}

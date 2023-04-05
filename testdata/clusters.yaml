@@ -1,9 +1,0 @@
-clusters:
-- cluster:
-    server: https://some.cluster.com/api
-    certificate-authority-data: DATA
-  name: c1
-- cluster:
-    server: https://some.cluster.com/api
-    certificate-authority-data: DATA
-  name: c2

@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Config
+
+clusters:
+  - cluster:
+      server: https://cluster-1.domain.org/
+      certificate-authority-data: ZGF0YQo=
+    name: cluster-1
+
+users:
+  - user:
+    name: joe
+
+contexts:
+  - context:
+      cluster: cluster-1
+      user: joe
+    name: cluster-1

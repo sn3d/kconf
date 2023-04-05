@@ -4,12 +4,12 @@ kind: Config
 clusters:
   - cluster:
       server: https://cluster-2.domain.org/
-      certificate-authority-data: data2
+      certificate-authority-data: ZGF0YTIK
     name: cluster-2
 
 users:
   - user:
-      client-key-data: userdata2
+      client-key-data: dXNlcmRhdGEyCg==
     name: jim
 
 contexts:

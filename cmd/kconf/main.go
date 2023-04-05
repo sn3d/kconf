@@ -32,6 +32,7 @@ func main() {
 	err := app.Run(os.Args)
 	if err != nil {
 		// print error
-		fmt.Printf("Error: %e", err)
+		fmt.Fprintf(os.Stderr, "Error: %s\n", err.Error())
+		os.Exit(1)
 	}
 }
