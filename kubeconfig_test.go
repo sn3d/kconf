@@ -2,6 +2,7 @@ package kconf
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/sn3d/testdata"
@@ -38,8 +39,7 @@ func Test_Import(t *testing.T) {
 	cfg2, _ := Open(testdata.Abs("import-2.yaml"))
 
 	cfg1.Import(cfg2)
-
-	cfg1.Save("import-result.yaml")
+	cfg1.Save(testdata.Abs("import-result.yaml"))
 
 	// validate users
 	users := cfg1.AuthInfos
@@ -47,7 +47,8 @@ func Test_Import(t *testing.T) {
 		t.FailNow()
 	}
 
-	if users[1].AuthInfo.ClientKey != "userdata2" {
+	clientKey := strings.TrimRight(string(users[1].AuthInfo.ClientKeyData), "\n")
+	if clientKey != "userdata2" {
 		t.FailNow()
 	}
 
