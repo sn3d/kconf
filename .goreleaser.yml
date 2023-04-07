@@ -29,3 +29,12 @@ archives:
 
 release:
   name_template: '{{ .ProjectName }}-v{{ .Version }}'
+
+brews:
+  - name: flux
+    tap:
+      owner: sn3d
+      name: homebrew-tap
+    folder: Formula
+    homepage: "https://github.com/sn3d/"
+    description: "Kconf helps you with kubeconfig manipulation"
