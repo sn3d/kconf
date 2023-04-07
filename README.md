@@ -114,9 +114,19 @@ cyan             cyan             cyan             default
 Currently, kconf is not available in any package system like Homebrew etc.
 But it's simple binary file which can be easily installed by downloading.
 
-### MacOS or Linux
+### Homebrew (MacOS or Linux)
 
-You can install kconf with curl or get with those one-liners:
+The preferred method for is to use the Homebrew.
+
+```bash
+brew install sn3d/tap/kconf
+```
+
+
+### Curl or wget (MacOS or Linux)
+
+If you don't have brew on your system, you can install `kconf` 
+with `curl` or `wget` with one of those one-liners:
 
 ```bash
 curl -s https://installme.sh/sn3d/kconf | sh
