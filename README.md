@@ -15,6 +15,12 @@ can use UNIX piping, or I can copy&paste new cluster context into.
 
 I wrote this tool for myself, to relive pains with context manipulation.
 
+All you need is 
+
+```shell
+brew install sn3d/tap/kconf
+```
+
 ## Import and Export
 
 - import a cluster from existing file to your `KUBECONFIG` file
