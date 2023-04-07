@@ -13,9 +13,8 @@ I wanted something simple. I want add a new cluster into my existing
 `KUBECONFIG` file quickly. Ideally from various sources. Ideally something, I
 can use UNIX piping, or I can copy&paste new cluster context into.
 
-I wrote this tool for myself, to relive pains with context manipulation.
-
-All you need is 
+I wrote this tool for myself, to relive pains with context manipulation. All 
+you need is:
 
 ```shell
 brew install sn3d/tap/kconf
