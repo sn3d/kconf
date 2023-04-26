@@ -133,5 +133,27 @@ func Test_RenameContet(t *testing.T) {
 	if cluster == nil {
 		t.FailNow()
 	}
+}
 
+func Test_Split(t *testing.T) {
+	testdata.Setup()
+
+	kcfg, err := Open(testdata.Abs("split.yaml"))
+	if err != nil {
+		t.FailNow()
+	}
+
+	splitted := kcfg.Split()
+	if len(splitted) != 3 {
+		t.FailNow()
+	}
+
+	testingKcfg := splitted[1]
+	if testingKcfg.CurrentContext != testingKcfg.Contexts[0].Name {
+		t.FailNow()
+	}
+
+	if testingKcfg.Clusters[0].Name != testingKcfg.Contexts[0].Context.Cluster {
+		t.FailNow()
+	}
 }
