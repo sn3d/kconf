@@ -114,6 +114,37 @@ kind-cluster1    kind-cluster1    kind-cluster1    mytest
 cyan             cyan             cyan             default
 ```
 
+## Splitting kubeconfig
+
+You can split given Kubeconfig into smaller pieces with `kconf split` subdommand. 
+Each context will be saved into separated file. The file will follow given prefix, 
+and context name as suffix.
+
+```shell
+$ kconf split cluster-
+cluster-red
+cluster-green
+cluster-blue
+```
+
+You can also set additional postfix and get even better names of files:
+
+```shell
+$ kconf split --additional-postfix=.yaml cluster-
+cluster-red.yaml
+cluster-green.yaml
+cluster-blue.yaml
+```
+
+You can change the postfix from context name to 2 digit number by using `-d` flag:
+
+```shell
+$ kconf split -d --additional-postfix=.yaml cluster-
+cluster-01.yaml
+cluster-02.yaml
+cluster-03.yaml
+```
+
 ## Installation
 
 Currently, kconf is not available in any package system like Homebrew etc.
@@ -126,7 +157,6 @@ The preferred method for is to use the Homebrew.
 ```bash
 brew install sn3d/tap/kconf
 ```
-
 
 ### Curl or wget (MacOS or Linux)
 

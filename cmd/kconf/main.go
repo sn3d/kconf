@@ -9,6 +9,7 @@ import (
 	"github.com/sn3d/kconf/cmd/kconf/ls"
 	"github.com/sn3d/kconf/cmd/kconf/mv"
 	"github.com/sn3d/kconf/cmd/kconf/rm"
+	"github.com/sn3d/kconf/cmd/kconf/split"
 	"github.com/urfave/cli/v2"
 )
 
@@ -26,6 +27,7 @@ func main() {
 			rm.Cmd,
 			mv.Cmd,
 			ls.Cmd,
+			split.Cmd,
 		},
 	}
 

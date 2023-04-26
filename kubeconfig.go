@@ -150,3 +150,21 @@ func (c *KubeConfig) Rename(src, dest string) {
 	c.renameUser(ctx.Context.AuthInfo, dest)
 	c.renameContext(src, dest)
 }
+
+// split one kubeconfig into smaller kubeconfig pieces for
+// each context
+func (c *KubeConfig) Split() []*KubeConfig {
+	result := make([]*KubeConfig, len(c.Contexts))
+	for i := range c.Contexts {
+		result[i] = New()
+		result[i].addToContexts(c.Contexts[i])
+		result[i].CurrentContext = c.Contexts[i].Name
+
+		usr := c.getUser(c.Contexts[i].Context.AuthInfo)
+		result[i].addToUsers(*usr)
+
+		cluster := c.getCluster(c.Contexts[i].Context.Cluster)
+		result[i].addToClusters(*cluster)
+	}
+	return result
+}
