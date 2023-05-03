@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/sn3d/kconf"
+	"github.com/sn3d/kconf/internal/tui"
 	"github.com/urfave/cli/v2"
 )
 
@@ -41,7 +42,14 @@ var Cmd = &cli.Command{
 			fmt.Printf("Cannot open your kubeconfig. Check if you have KUBECONFIG env. variable defined, or use --kubeconfig.\n")
 		}
 
-		err = kc.Chclus(cCtx.String("context"), cCtx.Args().First())
+		var selected string
+		if cCtx.Args().First() != "" {
+			selected = cCtx.Args().First()
+		} else {
+			selected = showClusterList(cCtx.String("context"), kc)
+		}
+
+		err = kc.Chclus(cCtx.String("context"), selected)
 		if err != nil {
 			return err
 		}
@@ -53,4 +61,19 @@ var Cmd = &cli.Command{
 
 		return nil
 	},
+}
+
+func showClusterList(context string, conf *kconf.KubeConfig) string {
+	if context == "" {
+		context = conf.CurrentContext
+	}
+
+	opts := make([]string, len(conf.Clusters))
+	for i := range conf.Clusters {
+		opts[i] = conf.Clusters[i].Name
+	}
+
+	title := fmt.Sprintf("change cluster for '%s' context ", context)
+	selected, _ := tui.List(title, "", opts)
+	return selected
 }
