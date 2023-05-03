@@ -103,7 +103,7 @@ func Test_RenameContet(t *testing.T) {
 	kcfg.Rename("blue", "cyan")
 
 	// blue resources (context, user, cluster) should not exist
-	ctx := kcfg.getContext("blue")
+	ctx := kcfg.GetContext("blue")
 	if ctx != nil {
 		t.FailNow()
 	}
@@ -119,7 +119,7 @@ func Test_RenameContet(t *testing.T) {
 	}
 
 	// 'cyan' resource (contex, user, cluster) must exist
-	ctx = kcfg.getContext("cyan")
+	ctx = kcfg.GetContext("cyan")
 	if ctx == nil {
 		t.FailNow()
 	}

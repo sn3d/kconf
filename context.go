@@ -2,7 +2,13 @@ package kconf
 
 import apiv1 "k8s.io/client-go/tools/clientcmd/api/v1"
 
-func (c *KubeConfig) getContext(name string) *apiv1.NamedContext {
+// get context by name. If name is empty string, then it returns you
+// current context
+func (c *KubeConfig) GetContext(name string) *apiv1.NamedContext {
+	if name == "" {
+		name = c.CurrentContext
+	}
+
 	for i := range c.Contexts {
 		if c.Contexts[i].Name == name {
 			return &c.Contexts[i]
@@ -22,7 +28,7 @@ func (c *KubeConfig) getFullContext(name string) (*apiv1.NamedContext, *apiv1.Na
 		user    *apiv1.NamedAuthInfo
 	)
 
-	ctx = c.getContext(name)
+	ctx = c.GetContext(name)
 	if ctx != nil {
 		cluster = c.getCluster(ctx.Context.AuthInfo)
 		user = c.getUser(ctx.Context.Cluster)
@@ -42,7 +48,7 @@ func (c *KubeConfig) removeFromContexts(name string) {
 }
 
 func (c *KubeConfig) renameContext(src, dest string) {
-	context := c.getContext(src)
+	context := c.GetContext(src)
 	if context != nil {
 		context.Name = dest
 	}
