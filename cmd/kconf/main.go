@@ -4,12 +4,18 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/sn3d/kconf/cmd/kconf/cc"
+	"github.com/sn3d/kconf/cmd/kconf/chclus"
+	"github.com/sn3d/kconf/cmd/kconf/chns"
+	"github.com/sn3d/kconf/cmd/kconf/chusr"
+	"github.com/sn3d/kconf/cmd/kconf/clustermod"
 	"github.com/sn3d/kconf/cmd/kconf/export"
 	"github.com/sn3d/kconf/cmd/kconf/imprt"
 	"github.com/sn3d/kconf/cmd/kconf/ls"
 	"github.com/sn3d/kconf/cmd/kconf/mv"
 	"github.com/sn3d/kconf/cmd/kconf/rm"
 	"github.com/sn3d/kconf/cmd/kconf/split"
+	"github.com/sn3d/kconf/cmd/kconf/usermod"
 	"github.com/urfave/cli/v2"
 )
 
@@ -28,6 +34,12 @@ func main() {
 			mv.Cmd,
 			ls.Cmd,
 			split.Cmd,
+			cc.Cmd,
+			chns.Cmd,
+			chusr.Cmd,
+			chclus.Cmd,
+			usermod.Cmd,
+			clustermod.Cmd,
 		},
 	}
 

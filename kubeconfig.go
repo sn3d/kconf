@@ -127,7 +127,7 @@ func (cfg *KubeConfig) Export(contextName string) (*KubeConfig, error) {
 // completely remove context by name and context's
 // cluster and user
 func (c *KubeConfig) Remove(contextName string) {
-	ctx := c.getContext(contextName)
+	ctx := c.GetContext(contextName)
 	if ctx == nil {
 		return
 	}
@@ -141,7 +141,7 @@ func (c *KubeConfig) Remove(contextName string) {
 // cluster and user will have name same as is new name
 // of context
 func (c *KubeConfig) Rename(src, dest string) {
-	ctx := c.getContext(src)
+	ctx := c.GetContext(src)
 	if ctx == nil {
 		return
 	}
