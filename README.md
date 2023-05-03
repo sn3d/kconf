@@ -3,8 +3,32 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/sn3d/kconf)](https://goreportcard.com/report/github.com/sn3d/kconf)
 [![codebeat badge](https://codebeat.co/badges/4d9db5e8-918f-4561-a9de-5c27c1f509ad)](https://codebeat.co/projects/github-com-sn3d-kconf-main)
 
-The `kconf` helps you with kubeconfigs.
+The `kconf` helps you with kubeconfigs. The main vision of this tool is:
 
+- help people who are dealing with many clusters every day
+- reduce need of editing YAML
+- inspired by unix-like well known commands
+- usable for humans and scripts
+
+The tool currently support following operations:
+
+```
+COMMANDS:
+   import      import given kubeconfig on stdin to your configuration
+   export      Export context with user and cluster from your configuration
+   rm          remove context and context's cluster and user (if it's possible)
+   mv          rename SOURCE context to DEST context. Also rename context's cluster and user if it's possible
+   ls          list of all contexts
+   split       split a kubeconfig into separated context pieces
+   cc          change current context
+   chns        change default namespace for context
+   chusr       change user for context
+   chclus      change cluster for context
+   usermod     modify a user
+   clustermod  modify a cluster
+```
+
+## Motivation
 One of the annoying operations with `KUBECONFIG` for me is merging a new cluster
 into existing file. I don't want to modify my `KUBECONFIG` everytime, when I
 need to add a new cluster. I was tired if manual merging of YAMLs.
@@ -13,12 +37,37 @@ I wanted something simple. I want add a new cluster into my existing
 `KUBECONFIG` file quickly. Ideally from various sources. Ideally something, I
 can use UNIX piping, or I can copy&paste new cluster context into.
 
-I wrote this tool for myself, to relive pains with context manipulation. All 
-you need is:
+I wrote this tool primary for myself, to relive pains with context manipulation.
 
-```shell
+## Installation
+
+### Homebrew (MacOS or Linux)
+
+The preferred method for is to use the Homebrew.
+
+```bash
 brew install sn3d/tap/kconf
 ```
+
+### Curl or wget (MacOS or Linux)
+
+If you don't have brew on your system, you can install `kconf` 
+with `curl` or `wget` with one of those one-liners:
+
+```bash
+curl -s https://installme.sh/sn3d/kconf | sh
+```
+
+or
+
+```bash
+wget -q -O - https://installme.sh/sn3d/kconf | sh
+```
+
+### Windows
+
+Download the correct binary for your platform from [project's GitHub](https://github.com/sn3d/kconf/releases/).
+Uncompress the binary to you PATH.
 
 ## Import and Export
 
@@ -103,8 +152,8 @@ rancher-desktop  rancher-desktop  rancher-desktop
 cyan             cyan             cyan             default
 ```
 
-And last but not least is `rm`. This commant will remove context with 
-associated user and cluster.
+You can also do cleanup of your kubeconfig with `rm`. This commant will remove 
+context with associated user and cluster.
 
 ```shell
 $ kconf rm rancher-desktop
@@ -112,6 +161,33 @@ $ kconf ls -l
 CONTEXT          CLUSTER          USER             NAMESPACE
 kind-cluster1    kind-cluster1    kind-cluster1    mytest
 cyan             cyan             cyan             default
+```
+
+## Modifications
+
+One of the annoying operations for me was changing the URL for cluster. I 
+need change the URL of `cluster` or update Token for `user`. The 
+`kconf` offers you `usermod` and `clustermod` subcommands. For instance you 
+can change the cluster's URL:
+
+```shell
+$ kconf clustermod --url=https://newpath.com/ my-cluster
+```
+
+## Changing context
+
+The `kconf` offers you `chns`, `chusr` and `chclus` commands, they're modifying
+current or given context. For instance, with `chns` you can change the 
+default namespace of current context:
+
+```
+$ kconf chns new-namespace
+```
+
+You can also specify context you want to change via `--context` option:
+
+```
+# kconf chusr --context=my-context new-user
 ```
 
 ## Splitting kubeconfig
@@ -146,9 +222,6 @@ cluster-03.yaml
 ```
 
 ## Installation
-
-Currently, kconf is not available in any package system like Homebrew etc.
-But it's simple binary file which can be easily installed by downloading.
 
 ### Homebrew (MacOS or Linux)
 
