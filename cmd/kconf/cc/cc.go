@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/sn3d/kconf"
+	"github.com/sn3d/kconf/internal/tui"
 	"github.com/urfave/cli/v2"
 )
 
@@ -36,8 +37,18 @@ var Cmd = &cli.Command{
 			fmt.Printf("Cannot open your kubeconfig. Check if you have KUBECONFIG env. variable defined, or use --kubeconfig.\n")
 		}
 
-		kc.CurrentContext = cCtx.Args().First()
+		var selected string
+		if cCtx.Args().First() != "" {
+			selected = cCtx.Args().First()
+		} else {
+			selected = showList(kubeConfigFile, kc)
+		}
 
+		if selected == "" {
+			return fmt.Errorf("nothing selected\n")
+		}
+
+		kc.CurrentContext = selected
 		err = kc.Save(kubeConfigFile)
 		if err != nil {
 			return err
@@ -45,4 +56,14 @@ var Cmd = &cli.Command{
 
 		return nil
 	},
+}
+
+func showList(file string, conf *kconf.KubeConfig) string {
+	opts := make([]string, len(conf.Contexts))
+	for i := range conf.Contexts {
+		opts[i] = conf.Contexts[i].Name
+	}
+
+	selected, _ := tui.List(file, conf.CurrentContext, opts)
+	return selected
 }
