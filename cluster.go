@@ -1,14 +1,11 @@
 package kconf
 
 import (
-	"fmt"
-
 	apiv1 "k8s.io/client-go/tools/clientcmd/api/v1"
 )
 
 func (c *KubeConfig) getCluster(name string) *apiv1.NamedCluster {
 	for i := range c.Clusters {
-		fmt.Printf("%s == %s\n", c.Clusters[i].Name, name)
 		if c.Clusters[i].Name == name {
 			return &c.Clusters[i]
 		}
