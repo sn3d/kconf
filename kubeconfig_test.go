@@ -5,13 +5,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/sn3d/testdata"
+	. "github.com/sn3d/tdata"
 )
 
 func Test_Open(t *testing.T) {
-	testdata.Setup()
+	InitTestdata()
 
-	cfg, err := Open(testdata.Abs("open-test.yaml"))
+	cfg, err := Open(Abs("open-test.yaml"))
 	if err != nil {
 		t.FailNow()
 	}
@@ -19,27 +19,26 @@ func Test_Open(t *testing.T) {
 	fmt.Println(cfg)
 	fmt.Println(cfg.Clusters[0].Cluster.CertificateAuthorityData)
 
-	err = cfg.Save(testdata.Abs("save-test.yaml"))
+	err = cfg.Save(Abs("save-test.yaml"))
 	if err != nil {
 		t.FailNow()
 	}
 
-	same := testdata.CompareFiles("save-test.yaml", "save-expected.yaml")
+	same := CompareFiles("save-test.yaml", "save-expected.yaml")
 	if !same {
 		t.FailNow()
 	}
 }
 
 func Test_Import(t *testing.T) {
-
-	testdata.Setup()
+	InitTestdata()
 
 	// add configuration 2 into configuration 1
-	cfg1, _ := Open(testdata.Abs("import-1.yaml"))
-	cfg2, _ := Open(testdata.Abs("import-2.yaml"))
+	cfg1, _ := Open(Abs("import-1.yaml"))
+	cfg2, _ := Open(Abs("import-2.yaml"))
 
 	cfg1.Import(cfg2)
-	cfg1.Save(testdata.Abs("import-result.yaml"))
+	cfg1.Save(Abs("import-result.yaml"))
 
 	// validate users
 	users := cfg1.AuthInfos
@@ -70,9 +69,9 @@ func Test_Import(t *testing.T) {
 }
 
 func Test_RemoveContext(t *testing.T) {
-	testdata.Setup()
+	InitTestdata()
 
-	kcfg, err := Open(testdata.Abs("remove-test.yaml"))
+	kcfg, err := Open(Abs("remove-test.yaml"))
 	if err != nil {
 		t.FailNow()
 	}
@@ -93,9 +92,9 @@ func Test_RemoveContext(t *testing.T) {
 }
 
 func Test_RenameContet(t *testing.T) {
-	testdata.Setup()
+	InitTestdata()
 
-	kcfg, err := Open(testdata.Abs("rename-test.yaml"))
+	kcfg, err := Open(Abs("rename-test.yaml"))
 	if err != nil {
 		t.FailNow()
 	}
@@ -136,9 +135,9 @@ func Test_RenameContet(t *testing.T) {
 }
 
 func Test_Split(t *testing.T) {
-	testdata.Setup()
+	InitTestdata()
 
-	kcfg, err := Open(testdata.Abs("split.yaml"))
+	kcfg, err := Open(Abs("split.yaml"))
 	if err != nil {
 		t.FailNow()
 	}
