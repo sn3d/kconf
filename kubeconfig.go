@@ -127,6 +127,12 @@ func (cfg *KubeConfig) Export(contextName string) (*KubeConfig, error) {
 		exported.addToUsers(*user)
 	}
 
+	// ensure the current-context will be not empty when
+	// you run Export() with empty contextName.
+	if exported.CurrentContext == "" {
+		exported.CurrentContext = ctx.Name
+	}
+
 	return exported, nil
 }
 
