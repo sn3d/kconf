@@ -118,8 +118,14 @@ func (cfg *KubeConfig) Export(contextName string) (*KubeConfig, error) {
 	}
 
 	exported.addToContexts(*ctx)
-	exported.addToClusters(*cluster)
-	exported.addToUsers(*user)
+
+	if cluster != nil {
+		exported.addToClusters(*cluster)
+	}
+
+	if cluster != nil {
+		exported.addToUsers(*user)
+	}
 
 	return exported, nil
 }
