@@ -25,7 +25,7 @@ func (c *KubeConfig) Chusr(context, user string) error {
 		return fmt.Errorf("no context %s in kubeconfing", context)
 	}
 
-	usr := c.getUser(user)
+	usr := c.GetUser(user)
 	if usr == nil {
 		return fmt.Errorf("no user %s in kubeconfig", user)
 	}
@@ -67,7 +67,7 @@ func (c *KubeConfig) Clustermod(clusterName string, opts *ClustermodOptions) err
 
 // changing user's parameters
 func (c *KubeConfig) Usermod(userName string, opts *UsermodOptions) error {
-	usr := c.getUser(userName)
+	usr := c.GetUser(userName)
 	if usr == nil {
 		return fmt.Errorf("no user %s in kubeconfig", userName)
 	}

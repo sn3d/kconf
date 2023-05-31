@@ -81,6 +81,7 @@ func OpenData(data []byte) (*KubeConfig, error) {
 	}
 }
 
+// save the KubeConfig into file as YAML
 func (c *KubeConfig) Save(filename string) error {
 	fd, err := os.Create(filename)
 	if err != nil {
@@ -90,6 +91,8 @@ func (c *KubeConfig) Save(filename string) error {
 	return c.WriteTo(fd)
 }
 
+// write the KubeConfig into writer as YAML. It's used when
+// you need print the KubeConfig YAML into standard output etc.
 func (c *KubeConfig) WriteTo(w io.Writer) error {
 	err := apilatest.Codec.Encode(c.Config, w)
 	if err != nil {
@@ -172,7 +175,7 @@ func (c *KubeConfig) Split() []*KubeConfig {
 		result[i].addToContexts(c.Contexts[i])
 		result[i].CurrentContext = c.Contexts[i].Name
 
-		usr := c.getUser(c.Contexts[i].Context.AuthInfo)
+		usr := c.GetUser(c.Contexts[i].Context.AuthInfo)
 		result[i].addToUsers(*usr)
 
 		cluster := c.GetCluster(c.Contexts[i].Context.Cluster)

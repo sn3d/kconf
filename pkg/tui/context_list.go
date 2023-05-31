@@ -15,8 +15,6 @@ type contextItem struct {
 	Namespace  string
 }
 
-func (i contextItem) Title() string       { return i.Name }
-func (i contextItem) Description() string { return i.ClusterURL }
 func (i contextItem) FilterValue() string { return string(i.Name) }
 
 type contextItemDelegate struct {

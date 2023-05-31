@@ -2,7 +2,7 @@ package kconf
 
 import apiv1 "k8s.io/client-go/tools/clientcmd/api/v1"
 
-func (c *KubeConfig) getUser(name string) *apiv1.NamedAuthInfo {
+func (c *KubeConfig) GetUser(name string) *apiv1.NamedAuthInfo {
 	for i := range c.AuthInfos {
 		if c.AuthInfos[i].Name == name {
 			return &c.AuthInfos[i]
@@ -26,7 +26,7 @@ func (c *KubeConfig) removeFromUsers(name string) {
 }
 
 func (c *KubeConfig) renameUser(src, dest string) {
-	user := c.getUser(src)
+	user := c.GetUser(src)
 	if user != nil {
 		user.Name = dest
 	}
