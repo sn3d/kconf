@@ -3,7 +3,7 @@ package kconf_test
 import (
 	"testing"
 
-	"github.com/sn3d/kconf"
+	"github.com/sn3d/kconf/pkg/kconf"
 	. "github.com/sn3d/tdata"
 )
 

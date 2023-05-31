@@ -107,7 +107,7 @@ func Test_RenameContet(t *testing.T) {
 		t.FailNow()
 	}
 
-	cluster := kcfg.getCluster("blue-cluster")
+	cluster := kcfg.GetCluster("blue-cluster")
 	if cluster != nil {
 		t.FailNow()
 	}
@@ -128,7 +128,7 @@ func Test_RenameContet(t *testing.T) {
 		t.FailNow()
 	}
 
-	cluster = kcfg.getCluster("cyan")
+	cluster = kcfg.GetCluster("cyan")
 	if cluster == nil {
 		t.FailNow()
 	}
