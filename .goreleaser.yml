@@ -10,8 +10,6 @@ builds:
       - arm
       - arm64
 
-    main: ./cmd/kconf
-
     ldflags:
       - -X 'main.version={{.Version}}'
 

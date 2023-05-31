@@ -3,7 +3,7 @@ package export
 import (
 	"os"
 
-	"github.com/sn3d/kconf"
+	"github.com/sn3d/kconf/pkg/kconf"
 	"github.com/urfave/cli/v2"
 )
 

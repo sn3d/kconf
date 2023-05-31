@@ -5,8 +5,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/sn3d/kconf"
-	"github.com/sn3d/kconf/internal/tui"
+	"github.com/sn3d/kconf/pkg/kconf"
+	"github.com/sn3d/kconf/pkg/tui"
 	"github.com/urfave/cli/v2"
 )
 
