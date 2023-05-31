@@ -42,7 +42,7 @@ func (c *KubeConfig) Chclus(context, cluster string) error {
 		return fmt.Errorf("no context %s in kubeconfing", context)
 	}
 
-	usr := c.getCluster(cluster)
+	usr := c.GetCluster(cluster)
 	if usr == nil {
 		return fmt.Errorf("no cluster %s in kubeconfig", cluster)
 	}
@@ -53,7 +53,7 @@ func (c *KubeConfig) Chclus(context, cluster string) error {
 
 // changing clusters's parameters
 func (c *KubeConfig) Clustermod(clusterName string, opts *ClustermodOptions) error {
-	clst := c.getCluster(clusterName)
+	clst := c.GetCluster(clusterName)
 	if clst == nil {
 		return fmt.Errorf("no cluster %s in kubeconfig", clusterName)
 	}

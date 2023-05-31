@@ -74,6 +74,6 @@ func showUserList(context string, conf *kconf.KubeConfig) string {
 	}
 
 	title := fmt.Sprintf("change user for '%s' context ", context)
-	selected, _ := tui.List(title, "", opts)
+	selected, _ := tui.ShowSimpleList(title, "", opts)
 	return selected
 }

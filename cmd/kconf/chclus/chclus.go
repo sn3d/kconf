@@ -74,6 +74,6 @@ func showClusterList(context string, conf *kconf.KubeConfig) string {
 	}
 
 	title := fmt.Sprintf("change cluster for '%s' context ", context)
-	selected, _ := tui.List(title, "", opts)
+	selected, _ := tui.ShowSimpleList(title, "", opts)
 	return selected
 }

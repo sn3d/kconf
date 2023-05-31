@@ -175,7 +175,7 @@ func (c *KubeConfig) Split() []*KubeConfig {
 		usr := c.getUser(c.Contexts[i].Context.AuthInfo)
 		result[i].addToUsers(*usr)
 
-		cluster := c.getCluster(c.Contexts[i].Context.Cluster)
+		cluster := c.GetCluster(c.Contexts[i].Context.Cluster)
 		result[i].addToClusters(*cluster)
 	}
 	return result

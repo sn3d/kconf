@@ -4,7 +4,7 @@ import (
 	apiv1 "k8s.io/client-go/tools/clientcmd/api/v1"
 )
 
-func (c *KubeConfig) getCluster(name string) *apiv1.NamedCluster {
+func (c *KubeConfig) GetCluster(name string) *apiv1.NamedCluster {
 	for i := range c.Clusters {
 		if c.Clusters[i].Name == name {
 			return &c.Clusters[i]
@@ -28,7 +28,7 @@ func (c *KubeConfig) removeFromClusters(name string) {
 }
 
 func (c *KubeConfig) renameCluster(src, dest string) {
-	cluster := c.getCluster(src)
+	cluster := c.GetCluster(src)
 	if cluster != nil {
 		cluster.Name = dest
 	}

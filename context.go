@@ -30,7 +30,7 @@ func (c *KubeConfig) getFullContext(name string) (*apiv1.NamedContext, *apiv1.Na
 
 	ctx = c.GetContext(name)
 	if ctx != nil {
-		cluster = c.getCluster(ctx.Context.Cluster)
+		cluster = c.GetCluster(ctx.Context.Cluster)
 		user = c.getUser(ctx.Context.AuthInfo)
 	}
 

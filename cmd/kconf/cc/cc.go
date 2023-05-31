@@ -59,11 +59,6 @@ var Cmd = &cli.Command{
 }
 
 func showList(file string, conf *kconf.KubeConfig) string {
-	opts := make([]string, len(conf.Contexts))
-	for i := range conf.Contexts {
-		opts[i] = conf.Contexts[i].Name
-	}
-
-	selected, _ := tui.List(file, conf.CurrentContext, opts)
+	selected, _ := tui.ShowContextList(file, conf.CurrentContext, conf)
 	return selected
 }
