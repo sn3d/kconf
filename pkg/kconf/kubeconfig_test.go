@@ -112,7 +112,7 @@ func Test_RenameContet(t *testing.T) {
 		t.FailNow()
 	}
 
-	user := kcfg.getUser("John")
+	user := kcfg.GetUser("John")
 	if user != nil {
 		t.FailNow()
 	}
@@ -123,7 +123,7 @@ func Test_RenameContet(t *testing.T) {
 		t.FailNow()
 	}
 
-	user = kcfg.getUser("cyan")
+	user = kcfg.GetUser("cyan")
 	if user == nil {
 		t.FailNow()
 	}
