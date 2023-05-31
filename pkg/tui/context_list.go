@@ -6,7 +6,7 @@ import (
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/sn3d/kconf"
+	"github.com/sn3d/kconf/pkg/kconf"
 )
 
 type contextItem struct {
