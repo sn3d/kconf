@@ -3,7 +3,6 @@ package imprt
 import (
 	"io"
 	"os"
-	"strings"
 
 	"github.com/sn3d/kconf/pkg/kconf"
 	"github.com/urfave/cli/v2"
@@ -25,16 +24,7 @@ var Cmd = &cli.Command{
 
 	// main entry point for 'import'
 	Action: func(cCtx *cli.Context) error {
-		var kc *kconf.KubeConfig
-		var err error
-
-		kubeConfigFile := cCtx.String("kubeconfig")
-		if kubeConfigFile == "" {
-			configs := strings.Split(os.Getenv("KUBECONFIG"), ":")
-			kubeConfigFile = configs[0]
-		}
-
-		kc, err = kconf.Open(kubeConfigFile)
+		kc, path, err := kconf.Open(cCtx.String("kubeconfig"))
 		if err != nil {
 			return err
 		}
@@ -63,7 +53,7 @@ var Cmd = &cli.Command{
 
 		kc.Import(sourceCfg)
 
-		err = kc.Save(kubeConfigFile)
+		err = kc.Save(path)
 		if err != nil {
 			return err
 		}

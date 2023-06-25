@@ -11,7 +11,7 @@ import (
 func Test_Open(t *testing.T) {
 	InitTestdata()
 
-	cfg, err := Open(Abs("open-test.yaml"))
+	cfg, _, err := Open(Abs("open-test.yaml"))
 	if err != nil {
 		t.FailNow()
 	}
@@ -34,8 +34,8 @@ func Test_Import(t *testing.T) {
 	InitTestdata()
 
 	// add configuration 2 into configuration 1
-	cfg1, _ := Open(Abs("import-1.yaml"))
-	cfg2, _ := Open(Abs("import-2.yaml"))
+	cfg1, _, _ := Open(Abs("import-1.yaml"))
+	cfg2, _, _ := Open(Abs("import-2.yaml"))
 
 	cfg1.Import(cfg2)
 	cfg1.Save(Abs("import-result.yaml"))
@@ -71,7 +71,7 @@ func Test_Import(t *testing.T) {
 func Test_RemoveContext(t *testing.T) {
 	InitTestdata()
 
-	kcfg, err := Open(Abs("remove-test.yaml"))
+	kcfg, _, err := Open(Abs("remove-test.yaml"))
 	if err != nil {
 		t.FailNow()
 	}
@@ -94,7 +94,7 @@ func Test_RemoveContext(t *testing.T) {
 func Test_RenameContet(t *testing.T) {
 	InitTestdata()
 
-	kcfg, err := Open(Abs("rename-test.yaml"))
+	kcfg, _, err := Open(Abs("rename-test.yaml"))
 	if err != nil {
 		t.FailNow()
 	}
@@ -137,7 +137,7 @@ func Test_RenameContet(t *testing.T) {
 func Test_Split(t *testing.T) {
 	InitTestdata()
 
-	kcfg, err := Open(Abs("split.yaml"))
+	kcfg, _, err := Open(Abs("split.yaml"))
 	if err != nil {
 		t.FailNow()
 	}

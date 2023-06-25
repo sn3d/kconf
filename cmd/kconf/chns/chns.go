@@ -2,8 +2,6 @@ package chns
 
 import (
 	"fmt"
-	"os"
-	"strings"
 
 	"github.com/sn3d/kconf/pkg/kconf"
 	"github.com/urfave/cli/v2"
@@ -27,17 +25,9 @@ var Cmd = &cli.Command{
 
 	// main entry point for 'export'
 	Action: func(cCtx *cli.Context) error {
-		var kc *kconf.KubeConfig
-		var err error
-
-		kubeConfigFile := cCtx.String("kubeconfig")
-		if kubeConfigFile == "" {
-			configs := strings.Split(os.Getenv("KUBECONFIG"), ":")
-			kubeConfigFile = configs[0]
-		}
-
-		kc, err = kconf.Open(kubeConfigFile)
+		kc, path, err := kconf.Open(cCtx.String("kubeconfig"))
 		if err != nil {
+			return err
 			fmt.Printf("Cannot open your kubeconfig. Check if you have KUBECONFIG env. variable defined, or use --kubeconfig.\n")
 		}
 
@@ -46,7 +36,7 @@ var Cmd = &cli.Command{
 			return err
 		}
 
-		err = kc.Save(kubeConfigFile)
+		err = kc.Save(path)
 		if err != nil {
 			return err
 		}

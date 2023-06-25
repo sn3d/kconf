@@ -2,8 +2,6 @@ package cc
 
 import (
 	"fmt"
-	"os"
-	"strings"
 
 	"github.com/sn3d/kconf/pkg/kconf"
 	"github.com/sn3d/kconf/pkg/tui"
@@ -23,33 +21,24 @@ var Cmd = &cli.Command{
 
 	// main entry point for 'export'
 	Action: func(cCtx *cli.Context) error {
-		var kc *kconf.KubeConfig
-		var err error
-
-		kubeConfigFile := cCtx.String("kubeconfig")
-		if kubeConfigFile == "" {
-			configs := strings.Split(os.Getenv("KUBECONFIG"), ":")
-			kubeConfigFile = configs[0]
-		}
-
-		kc, err = kconf.Open(kubeConfigFile)
+		kc, path, err := kconf.Open(cCtx.String("kubeconfig"))
 		if err != nil {
-			fmt.Printf("Cannot open your kubeconfig. Check if you have KUBECONFIG env. variable defined, or use --kubeconfig.\n")
+			return err
 		}
 
 		var selected string
 		if cCtx.Args().First() != "" {
 			selected = cCtx.Args().First()
 		} else {
-			selected = showList(kubeConfigFile, kc)
+			selected = showList(path, kc)
 		}
 
 		if selected == "" {
-			return fmt.Errorf("nothing selected\n")
+			return fmt.Errorf("nothing selected")
 		}
 
 		kc.CurrentContext = selected
-		err = kc.Save(kubeConfigFile)
+		err = kc.Save(path)
 		if err != nil {
 			return err
 		}

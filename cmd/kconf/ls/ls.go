@@ -26,16 +26,11 @@ var Cmd = &cli.Command{
 
 	// main entry point for 'export'
 	Action: func(cCtx *cli.Context) error {
-		kubeConfigPath := cCtx.String("kubeconfig")
 		longList := cCtx.Bool("l")
 
-		var kc *kconf.KubeConfig
-		var err error
-
-		kc, err = kconf.Open(kubeConfigPath)
-
+		kc, _, err := kconf.Open(cCtx.String("kubeconfig"))
 		if err != nil {
-			fmt.Printf("Cannot open your kubeconfig. Check if you have KUBECONFIG env. variable defined, or use --kubeconfig.\n")
+			return err
 		}
 
 		w := tabwriter.NewWriter(os.Stdout, 5, 2, 2, ' ', tabwriter.DiscardEmptyColumns)

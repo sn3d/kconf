@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -31,23 +32,39 @@ func New() *KubeConfig {
 	}
 }
 
-// load data from given file and parse them into
-// KubeConfig instance. If file is not set (empty string),
-// the function will load and parse first kubeconfig in
-// KUBECONFIG env. variable.
-func Open(file string) (*KubeConfig, error) {
-	if file == "" {
-		envValue := os.Getenv("KUBECONFIG")
-		configs := strings.Split(envValue, ":")
-		file = configs[0]
+// open the given file and returns KubeConfig instance.
+// If given file is empty string, the function will load kubeconfig
+// from KUBECONFIG env. variable. If KUBECONFIG variable is not set,
+// then the function open default ~/.kube/config file.
+func Open(file string) (kc *KubeConfig, path string, err error) {
+	// figureout what file path need to be open
+	path = file
+	if path == "" {
+		path = os.Getenv("KUBECONFIG")
+		if path == "" {
+			home, _ := os.UserHomeDir()
+			path = filepath.Join(home, ".kube", "config")
+		}
 	}
 
-	data, err := os.ReadFile(file)
+	multipleConfigs := strings.Contains(path, ":")
+	if multipleConfigs {
+		configs := strings.Split(path, ":")
+		path = configs[0]
+	}
+
+	// read the file and parse KubeConfig
+	data, err := os.ReadFile(path)
 	if err != nil {
-		return nil, err
+		return nil, path, &OpenError{original: err, path: path}
 	}
 
-	return OpenData(data)
+	kc, err = OpenData(data)
+	if err != nil {
+		return nil, path, &OpenError{original: err, path: path}
+	}
+
+	return kc, path, nil
 }
 
 // OpenBase64 will decode input data from base64 and parse it

@@ -21,12 +21,8 @@ var Cmd = &cli.Command{
 	// main entry point for 'export'
 	Action: func(cCtx *cli.Context) error {
 		contextName := cCtx.Args().First()
-		kubeConfigPath := cCtx.String("kubeconfig")
 
-		var kc *kconf.KubeConfig
-		var err error
-
-		kc, err = kconf.Open(kubeConfigPath)
+		kc, _, err := kconf.Open(cCtx.String("kubeconfig"))
 		if err != nil {
 			return err
 		}

@@ -3,7 +3,6 @@ package split
 import (
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/sn3d/kconf/pkg/kconf"
 	"github.com/urfave/cli/v2"
@@ -32,16 +31,7 @@ var Cmd = &cli.Command{
 
 	// main entry point for 'export'
 	Action: func(cCtx *cli.Context) error {
-		kubeConfigFile := cCtx.String("kubeconfig")
-		if kubeConfigFile == "" {
-			configs := strings.Split(os.Getenv("KUBECONFIG"), ":")
-			kubeConfigFile = configs[0]
-		}
-
-		var kc *kconf.KubeConfig
-		var err error
-
-		kc, err = kconf.Open(kubeConfigFile)
+		kc, _, err := kconf.Open(cCtx.String("kubeconfig"))
 		if err != nil {
 			return err
 		}
