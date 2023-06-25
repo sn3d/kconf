@@ -16,3 +16,6 @@ vendor/
 
 # Directory where are binaries stored
 dist/
+
+# VS Code
+.vscode/*
