@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -93,9 +94,14 @@ func OpenData(data []byte) (*KubeConfig, error) {
 
 	if err != nil {
 		return nil, err
-	} else {
-		return &KubeConfig{Config: cfg}, nil
 	}
+
+	// sort contexts
+	sort.SliceStable(cfg.Contexts, func(i, j int) bool {
+		return strings.Compare(cfg.Contexts[i].Name, cfg.Contexts[j].Name) <= 0
+	})
+
+	return &KubeConfig{Config: cfg}, nil
 }
 
 // save the KubeConfig into file as YAML

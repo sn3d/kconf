@@ -30,6 +30,27 @@ func Test_Open(t *testing.T) {
 	}
 }
 
+func Test_OpenSorted(t *testing.T) {
+	InitTestdata()
+
+	cfg, _, err := Open(Abs("sorted-test.yaml"))
+	if err != nil {
+		t.FailNow()
+	}
+
+	if !strings.HasPrefix(cfg.Contexts[0].Name, "01-") {
+		t.FailNow()
+	}
+
+	if !strings.HasPrefix(cfg.Contexts[1].Name, "02-") {
+		t.FailNow()
+	}
+
+	if !strings.HasPrefix(cfg.Contexts[2].Name, "03-") {
+		t.FailNow()
+	}
+}
+
 func Test_Import(t *testing.T) {
 	InitTestdata()
 
