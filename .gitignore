@@ -19,3 +19,5 @@ dist/
 
 # VS Code
 .vscode/*
+
+/kconf
