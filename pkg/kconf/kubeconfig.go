@@ -179,7 +179,11 @@ func (c *KubeConfig) Rename(src, dest string) {
 	}
 
 	c.renameCluster(ctx.Context.Cluster, dest)
+	ctx.Context.Cluster = dest
+
 	c.renameUser(ctx.Context.AuthInfo, dest)
+	ctx.Context.AuthInfo = dest
+
 	c.renameContext(src, dest)
 }
 

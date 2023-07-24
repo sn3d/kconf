@@ -132,6 +132,15 @@ func Test_RenameContet(t *testing.T) {
 	if cluster == nil {
 		t.FailNow()
 	}
+
+	// cyan context must refer to correct user and cluster
+	if ctx.Context.Cluster != "cyan" {
+		t.FailNow()
+	}
+
+	if ctx.Context.AuthInfo != "cyan" {
+		t.FailNow()
+	}
 }
 
 func Test_Split(t *testing.T) {
