@@ -66,7 +66,12 @@ func ShowContextList(title string, picked string, conf *kconf.KubeConfig) (strin
 	for _, ctx := range conf.Contexts {
 		itm := contextItem{}
 		itm.Name = ctx.Name
-		itm.ClusterURL = conf.GetCluster(ctx.Context.Cluster).Cluster.Server
+
+		cluster := conf.GetCluster(ctx.Context.Cluster)
+		if cluster != nil {
+			itm.ClusterURL = cluster.Cluster.Server
+		}
+
 		itm.Namespace = ctx.Context.Namespace
 		items = append(items, itm)
 	}
