@@ -2,6 +2,7 @@ package kconf
 
 import (
 	"fmt"
+	"io/ioutil"
 )
 
 // change default namespace for given context. If given context
@@ -74,6 +75,22 @@ func (c *KubeConfig) Usermod(userName string, opts *UsermodOptions) error {
 
 	if opts.Token != "" {
 		usr.AuthInfo.Token = opts.Token
+	}
+
+	if opts.ClientCertificateFile != "" {
+		cert, err := ioutil.ReadFile(opts.ClientCertificateFile)
+		if err != nil {
+			return fmt.Errorf("cannot read client-cert file %s", opts.ClientCertificateFile)
+		}
+		usr.AuthInfo.ClientCertificateData = cert
+	}
+
+	if opts.ClientKeyFile != "" {
+		key, err := ioutil.ReadFile(opts.ClientKeyFile)
+		if err != nil {
+			return fmt.Errorf("cannot read client-key file %s", opts.ClientKeyFile)
+		}
+		usr.AuthInfo.ClientKeyData = key
 	}
 
 	return nil

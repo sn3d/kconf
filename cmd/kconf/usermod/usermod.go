@@ -18,6 +18,14 @@ var Cmd = &cli.Command{
 			Name:  "token",
 			Usage: "set the user token",
 		},
+		&cli.StringFlag{
+			Name:  "client-certificate",
+			Usage: "set the client-certificate from given file",
+		},
+		&cli.StringFlag{
+			Name:  "client-key",
+			Usage: "set the client-key from given file",
+		},
 	},
 
 	// main entry point for 'export'
@@ -28,7 +36,9 @@ var Cmd = &cli.Command{
 		}
 
 		opts := &kconf.UsermodOptions{
-			Token: cCtx.String("token"),
+			Token:                 cCtx.String("token"),
+			ClientCertificateFile: cCtx.String("client-certificate"),
+			ClientKeyFile:         cCtx.String("client-key"),
 		}
 
 		err = kc.Usermod(cCtx.Args().First(), opts)
