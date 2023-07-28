@@ -58,7 +58,7 @@ func Test_Import(t *testing.T) {
 	cfg1, _, _ := Open(Abs("import-1.yaml"))
 	cfg2, _, _ := Open(Abs("import-2.yaml"))
 
-	cfg1.Import(cfg2)
+	cfg1.Import(cfg2, &ImportOptions{})
 	cfg1.Save(Abs("import-result.yaml"))
 
 	// validate users

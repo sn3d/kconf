@@ -16,6 +16,10 @@ var Cmd = &cli.Command{
 			Name:  "kubeconfig",
 			Usage: "path to the kubeconfig file from where context is exported",
 		},
+		&cli.StringFlag{
+			Name:  "as",
+			Usage: "import context, user and cluster AS. this option rename the imported context (only if it's one)",
+		},
 	},
 
 	// main entry point for 'export'
@@ -27,7 +31,11 @@ var Cmd = &cli.Command{
 			return err
 		}
 
-		exportedCfg, err := kc.Export(contextName)
+		opts := kconf.ExportOptions{
+			As: cCtx.String("as"),
+		}
+
+		exportedCfg, err := kc.Export(contextName, &opts)
 		if err != nil {
 			return err
 		}

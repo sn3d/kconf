@@ -5,6 +5,14 @@ type CtxmodOptions struct {
 	User    string
 }
 
+type ImportOptions struct {
+	As string
+}
+
+type ExportOptions struct {
+	As string
+}
+
 type ClustermodOptions struct {
 	ServerURL string
 }
