@@ -127,7 +127,17 @@ func (c *KubeConfig) WriteTo(w io.Writer) error {
 
 // Import all users, contexts and clusters from src kubeconfig
 // to current kubeconfig
-func (c *KubeConfig) Import(src *KubeConfig) {
+func (c *KubeConfig) Import(src *KubeConfig, opts *ImportOptions) {
+
+	// If 'As' option is set and there is only one context, then it's
+	// renamed to 'As'
+	// Right now it's hard to do some meaningful and simple renaming
+	// if src have more than 1 context. Maybe later will be implemented
+	// some logic based on some need.
+	if opts.As != "" && len(src.Contexts) == 1 {
+		src.Rename(src.Contexts[0].Name, opts.As)
+	}
+
 	c.addToContexts(src.Contexts...)
 	c.addToClusters(src.Clusters...)
 	c.addToUsers(src.AuthInfos...)
@@ -135,7 +145,8 @@ func (c *KubeConfig) Import(src *KubeConfig) {
 
 // Export returns you new KubeConfig where is given context
 // with required User and Cluster.
-func (cfg *KubeConfig) Export(contextName string) (*KubeConfig, error) {
+func (cfg *KubeConfig) Export(contextName string, opts *ExportOptions) (*KubeConfig, error) {
+
 	exported := New()
 	exported.CurrentContext = contextName
 	ctx, cluster, user := cfg.getFullContext(contextName)
@@ -153,11 +164,14 @@ func (cfg *KubeConfig) Export(contextName string) (*KubeConfig, error) {
 		exported.addToUsers(*user)
 	}
 
-	// ensure the current-context will be not empty when
-	// you run Export() with empty contextName.
-	if exported.CurrentContext == "" {
-		exported.CurrentContext = ctx.Name
+	// If 'As' option is available, the context will be exported
+	// with given name
+	if opts.As != "" {
+		exported.Rename(contextName, opts.As)
 	}
+
+	// set current context to exported context
+	exported.CurrentContext = exported.Contexts[0].Name
 
 	return exported, nil
 }

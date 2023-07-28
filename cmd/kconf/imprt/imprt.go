@@ -16,6 +16,10 @@ var Cmd = &cli.Command{
 			Name:  "kubeconfig",
 			Usage: "path to the dest. kubeconfig where context is imported",
 		},
+		&cli.StringFlag{
+			Name:  "as",
+			Usage: "import context, user and cluster AS. this option rename the imported context (only if it's one)",
+		},
 		&cli.BoolFlag{
 			Name:  "base64",
 			Usage: "if your input is base64 decoded kubeconfig",
@@ -51,7 +55,8 @@ var Cmd = &cli.Command{
 			return err
 		}
 
-		kc.Import(sourceCfg)
+		opts := kconf.ImportOptions{As: cCtx.String("as")}
+		kc.Import(sourceCfg, &opts)
 
 		err = kc.Save(path)
 		if err != nil {
