@@ -18,5 +18,7 @@ type ClustermodOptions struct {
 }
 
 type UsermodOptions struct {
-	Token string
+	Token                 string
+	ClientCertificateFile string
+	ClientKeyFile         string
 }
