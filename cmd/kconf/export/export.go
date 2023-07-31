@@ -18,7 +18,7 @@ var Cmd = &cli.Command{
 		},
 		&cli.StringFlag{
 			Name:  "as",
-			Usage: "import context, user and cluster AS. this option rename the imported context (only if it's one)",
+			Usage: "export context, user and cluster AS. this option rename the imported context (only if it's one)",
 		},
 	},
 
