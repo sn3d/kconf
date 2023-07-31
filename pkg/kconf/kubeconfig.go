@@ -145,7 +145,12 @@ func (c *KubeConfig) Import(src *KubeConfig, opts *ImportOptions) {
 
 // Export returns you new KubeConfig where is given context
 // with required User and Cluster.
+// If contextName is empty string, then the current context will be
+// exported
 func (cfg *KubeConfig) Export(contextName string, opts *ExportOptions) (*KubeConfig, error) {
+	if contextName == "" {
+		contextName = cfg.CurrentContext
+	}
 
 	exported := New()
 	exported.CurrentContext = contextName
