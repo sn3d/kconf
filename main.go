@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
+	"github.com/sn3d/kconf/cmd/kconf/cc"
 	"os"
 
-	"github.com/sn3d/kconf/cmd/kconf/cc"
 	"github.com/sn3d/kconf/cmd/kconf/chclus"
 	"github.com/sn3d/kconf/cmd/kconf/chns"
 	"github.com/sn3d/kconf/cmd/kconf/chusr"

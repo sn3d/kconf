@@ -2,6 +2,7 @@ package chns
 
 import (
 	"fmt"
+	"github.com/sn3d/kconf/pkg/tui"
 
 	"github.com/sn3d/kconf/pkg/kconf"
 	"github.com/urfave/cli/v2"
@@ -31,7 +32,17 @@ var Cmd = &cli.Command{
 			fmt.Printf("Cannot open your kubeconfig. Check if you have KUBECONFIG env. variable defined, or use --kubeconfig.\n")
 		}
 
-		err = kc.Chns(cCtx.String("context"), cCtx.Args().First())
+		namespace := cCtx.Args().First()
+		if namespace == "" {
+			namespace = showNamespaceList(cCtx.String("context"), kc)
+		}
+
+		// nothing to change
+		if namespace == "" {
+			return nil
+		}
+
+		err = kc.Chns(cCtx.String("context"), namespace)
 		if err != nil {
 			return err
 		}
@@ -43,4 +54,23 @@ var Cmd = &cli.Command{
 
 		return nil
 	},
+}
+
+func showNamespaceList(configContext string, kc *kconf.KubeConfig) string {
+
+	if configContext != "" {
+		kc.CurrentContext = configContext
+	}
+
+	namespaces, err := kc.GetAllNamespaces()
+	if err != nil {
+		return ""
+	}
+
+	namespace, err := tui.ShowSimpleList(kc.CurrentContext+" namespaces", "", namespaces)
+	if err != nil {
+		return ""
+	}
+
+	return namespace
 }

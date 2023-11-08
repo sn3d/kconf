@@ -13,6 +13,7 @@ import (
 // ----------------------------------------------------------------------------
 
 var (
+	appStyle          = lipgloss.NewStyle().Padding(1, 2)
 	titleStyle        = lipgloss.NewStyle().MarginLeft(2)
 	itemStyle         = lipgloss.NewStyle()
 	selectedItemStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("170"))
@@ -41,7 +42,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch keypress := msg.String(); keypress {
-		case "ctrl+c":
+		case "ctrl+c", "q":
 			m.quitting = true
 			return m, tea.Quit
 		case "enter":
@@ -64,7 +65,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 // simple view function, for real rendering
 // of items in list are responsible delegates
 func (m model) View() string {
-	return "\n" + m.list.View()
+	return appStyle.Render(m.list.View())
 }
 
 // show list of items where items are rendered by given
