@@ -17,7 +17,8 @@ vendor/
 # Directory where are binaries stored
 dist/
 
-# VS Code
+# IDEs
 .vscode/*
+.idea/*
 
 /kconf

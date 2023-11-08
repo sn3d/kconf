@@ -1,15 +1,21 @@
 package kconf
 
 import (
+	"bytes"
+	"context"
 	"encoding/base64"
 	"fmt"
 	"io"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/tools/clientcmd"
 	"os"
 	"path/filepath"
 	"sort"
 	"strings"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 	apilatest "k8s.io/client-go/tools/clientcmd/api/latest"
 	apiv1 "k8s.io/client-go/tools/clientcmd/api/v1"
 )
@@ -125,6 +131,24 @@ func (c *KubeConfig) WriteTo(w io.Writer) error {
 	}
 }
 
+// This function converts KubeConfig into clientcmdapi.Config. The client-go library
+// comes with two Config-s. One is in clientcmd/api and one is in clientcmd/api/v1 package.
+// The current Kubeconfig is using clientcmd/api/v1. But clientcmd/api is used for establishing
+// k8s client connection. So this function converts KubeConfig into clientcmdapi.Config.
+//
+// Because there is no better way, we do conversion like: we write the current Kubeconfig into
+// memory as YAML, and then we load the YAML into clientcmdapi.Config. This is not very effective
+// but it works.
+func (c *KubeConfig) ConvertToClientcmdApiConfig() (*clientcmdapi.Config, error) {
+	buf := new(bytes.Buffer)
+	c.WriteTo(buf)
+	clientcmdApiConfig, err := clientcmd.Load(buf.Bytes())
+	if err != nil {
+		return nil, err
+	}
+	return clientcmdApiConfig, nil
+}
+
 // Import all users, contexts and clusters from src kubeconfig
 // to current kubeconfig
 func (c *KubeConfig) Import(src *KubeConfig, opts *ImportOptions) {
@@ -228,4 +252,41 @@ func (c *KubeConfig) Split() []*KubeConfig {
 		result[i].addToClusters(*cluster)
 	}
 	return result
+}
+
+func (c *KubeConfig) GetAllNamespaces() ([]string, error) {
+
+	// get k8s client for given kubeconfig and context
+	restCfg, err := clientcmd.BuildConfigFromKubeconfigGetter("", func() (*clientcmdapi.Config, error) {
+		apiConfig, err := c.ConvertToClientcmdApiConfig()
+		if err != nil {
+			return nil, err
+		}
+
+		apiConfig.CurrentContext = c.CurrentContext
+		return apiConfig, nil
+	})
+
+	if err != nil {
+		return []string{}, err
+	}
+
+	k8sClient, err := kubernetes.NewForConfig(restCfg)
+	if err != nil {
+		return []string{}, err
+	}
+
+	// get all namespaces
+	namespaces, err := k8sClient.CoreV1().Namespaces().List(context.Background(), metav1.ListOptions{})
+	if err != nil {
+		return []string{}, err
+	}
+
+	result := make([]string, len(namespaces.Items))
+	for i, ns := range namespaces.Items {
+		fmt.Println(ns.Name)
+		result[i] = ns.Name
+	}
+
+	return result, nil
 }
