@@ -1,31 +1,40 @@
-package rm
+package clst
 
 import (
 	"github.com/sn3d/kconf/pkg/kconf"
 	"github.com/urfave/cli/v2"
 )
 
-var Cmd = &cli.Command{
-	Name:      "rm",
-	Usage:     "remove context and context's cluster and user (if it's possible)",
-	ArgsUsage: "[contextName]",
+var modCmd = &cli.Command{
+	Name:      "mod",
+	Usage:     "modify a cluster",
+	ArgsUsage: "[CLUSTER]",
 	Flags: []cli.Flag{
 		&cli.StringFlag{
 			Name:  "kubeconfig",
 			Usage: "path to kubeconfig from where export context",
 		},
+		&cli.StringFlag{
+			Name:  "url",
+			Usage: "set the cluster URL",
+		},
 	},
 
 	// main entry point for 'export'
 	Action: func(cCtx *cli.Context) error {
-		contextName := cCtx.Args().First()
-
 		kc, path, err := kconf.Open(cCtx.String("kubeconfig"))
 		if err != nil {
 			return err
 		}
 
-		kc.Remove(contextName)
+		opts := &kconf.ClustermodOptions{
+			ServerURL: cCtx.String("url"),
+		}
+
+		err = kc.Clustermod(cCtx.Args().First(), opts)
+		if err != nil {
+			return err
+		}
 
 		err = kc.Save(path)
 		if err != nil {

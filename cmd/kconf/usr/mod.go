@@ -1,12 +1,12 @@
-package usermod
+package usr
 
 import (
 	"github.com/sn3d/kconf/pkg/kconf"
 	"github.com/urfave/cli/v2"
 )
 
-var Cmd = &cli.Command{
-	Name:      "usermod",
+var modCmd = &cli.Command{
+	Name:      "mod",
 	Usage:     "modify a user",
 	ArgsUsage: "[USER]",
 	Flags: []cli.Flag{

@@ -1,15 +1,14 @@
-package cc
+package ctx
 
 import (
 	"fmt"
-
 	"github.com/sn3d/kconf/pkg/kconf"
 	"github.com/sn3d/kconf/pkg/tui"
 	"github.com/urfave/cli/v2"
 )
 
 var Cmd = &cli.Command{
-	Name:      "cc",
+	Name:      "ctx",
 	Usage:     "change current context",
 	ArgsUsage: "[CONTEXT]",
 	Flags: []cli.Flag{
@@ -17,6 +16,11 @@ var Cmd = &cli.Command{
 			Name:  "kubeconfig",
 			Usage: "path to kubeconfig from where export context",
 		},
+	},
+
+	Subcommands: []*cli.Command{
+		mvCmd,
+		rmCmd,
 	},
 
 	// main entry point for 'export'

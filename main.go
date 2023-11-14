@@ -2,20 +2,16 @@ package main
 
 import (
 	"fmt"
-	"github.com/sn3d/kconf/cmd/kconf/cc"
+	"github.com/sn3d/kconf/cmd/kconf/clst"
+	"github.com/sn3d/kconf/cmd/kconf/ctx"
+	"github.com/sn3d/kconf/cmd/kconf/ns"
+	"github.com/sn3d/kconf/cmd/kconf/usr"
 	"os"
 
-	"github.com/sn3d/kconf/cmd/kconf/chclus"
-	"github.com/sn3d/kconf/cmd/kconf/chns"
-	"github.com/sn3d/kconf/cmd/kconf/chusr"
-	"github.com/sn3d/kconf/cmd/kconf/clustermod"
 	"github.com/sn3d/kconf/cmd/kconf/export"
 	"github.com/sn3d/kconf/cmd/kconf/imprt"
 	"github.com/sn3d/kconf/cmd/kconf/ls"
-	"github.com/sn3d/kconf/cmd/kconf/mv"
-	"github.com/sn3d/kconf/cmd/kconf/rm"
 	"github.com/sn3d/kconf/cmd/kconf/split"
-	"github.com/sn3d/kconf/cmd/kconf/usermod"
 	"github.com/urfave/cli/v2"
 )
 
@@ -30,16 +26,12 @@ func main() {
 		Commands: []*cli.Command{
 			imprt.Cmd,
 			export.Cmd,
-			rm.Cmd,
-			mv.Cmd,
+			ctx.Cmd,
+			usr.Cmd,
+			clst.Cmd,
+			ns.Cmd,
 			ls.Cmd,
 			split.Cmd,
-			cc.Cmd,
-			chns.Cmd,
-			chusr.Cmd,
-			chclus.Cmd,
-			usermod.Cmd,
-			clustermod.Cmd,
 		},
 	}
 

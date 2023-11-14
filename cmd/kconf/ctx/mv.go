@@ -1,13 +1,13 @@
-package mv
+package ctx
 
 import (
 	"github.com/sn3d/kconf/pkg/kconf"
 	"github.com/urfave/cli/v2"
 )
 
-var Cmd = &cli.Command{
+var mvCmd = &cli.Command{
 	Name:      "mv",
-	Usage:     "rename SOURCE context to DEST context. Also rename context's cluster and user if it's possible",
+	Usage:     "move source context to destination context",
 	ArgsUsage: "[SOURCE] [DEST]",
 	Flags: []cli.Flag{
 		&cli.StringFlag{

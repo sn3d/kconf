@@ -1,15 +1,14 @@
-package chns
+package ns
 
 import (
 	"fmt"
-	"github.com/sn3d/kconf/pkg/tui"
-
 	"github.com/sn3d/kconf/pkg/kconf"
+	"github.com/sn3d/kconf/pkg/tui"
 	"github.com/urfave/cli/v2"
 )
 
 var Cmd = &cli.Command{
-	Name:      "chns",
+	Name:      "ns",
 	Usage:     "change default namespace for context",
 	ArgsUsage: "[NAMESPACE]",
 	Flags: []cli.Flag{

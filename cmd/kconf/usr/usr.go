@@ -1,17 +1,16 @@
-package chclus
+package usr
 
 import (
 	"fmt"
-
 	"github.com/sn3d/kconf/pkg/kconf"
 	"github.com/sn3d/kconf/pkg/tui"
 	"github.com/urfave/cli/v2"
 )
 
 var Cmd = &cli.Command{
-	Name:      "chclus",
-	Usage:     "change cluster for context",
-	ArgsUsage: "[CLUSTER]",
+	Name:      "usr",
+	Usage:     "change user for context",
+	ArgsUsage: "[USER]",
 	Flags: []cli.Flag{
 		&cli.StringFlag{
 			Name:  "kubeconfig",
@@ -20,8 +19,12 @@ var Cmd = &cli.Command{
 		&cli.StringFlag{
 			Name:    "context",
 			Aliases: []string{"c"},
-			Usage:   "context for which you want to change cluster",
+			Usage:   "context for which you want to change user",
 		},
+	},
+
+	Subcommands: []*cli.Command{
+		modCmd,
 	},
 
 	// main entry point for 'export'
@@ -35,10 +38,10 @@ var Cmd = &cli.Command{
 		if cCtx.Args().First() != "" {
 			selected = cCtx.Args().First()
 		} else {
-			selected = showClusterList(cCtx.String("context"), kc)
+			selected = showUserList(cCtx.String("context"), kc)
 		}
 
-		err = kc.Chclus(cCtx.String("context"), selected)
+		err = kc.Chusr(cCtx.String("context"), selected)
 		if err != nil {
 			return err
 		}
@@ -52,17 +55,17 @@ var Cmd = &cli.Command{
 	},
 }
 
-func showClusterList(context string, conf *kconf.KubeConfig) string {
+func showUserList(context string, conf *kconf.KubeConfig) string {
 	if context == "" {
 		context = conf.CurrentContext
 	}
 
-	opts := make([]string, len(conf.Clusters))
-	for i := range conf.Clusters {
-		opts[i] = conf.Clusters[i].Name
+	opts := make([]string, len(conf.AuthInfos))
+	for i := range conf.AuthInfos {
+		opts[i] = conf.AuthInfos[i].Name
 	}
 
-	title := fmt.Sprintf("change cluster for '%s' context ", context)
+	title := fmt.Sprintf("change user for '%s' context ", context)
 	selected, _ := tui.ShowSimpleList(title, "", opts)
 	return selected
 }
