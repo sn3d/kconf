@@ -2,8 +2,12 @@ package clst
 
 import (
 	"fmt"
+
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/sn3d/kconf/cmd/kconf/clst/mod"
 	"github.com/sn3d/kconf/pkg/kconf"
-	"github.com/sn3d/kconf/pkg/tui"
+	"github.com/sn3d/kconf/pkg/tui/list"
+
 	"github.com/urfave/cli/v2"
 )
 
@@ -24,48 +28,59 @@ var Cmd = &cli.Command{
 	},
 
 	Subcommands: []*cli.Command{
-		modCmd,
+		mod.Cmd,
 	},
 
 	// main entry point for 'export'
 	Action: func(cCtx *cli.Context) error {
-		kc, path, err := kconf.Open(cCtx.String("kubeconfig"))
-		if err != nil {
-			return err
-		}
-
-		var selected string
-		if cCtx.Args().First() != "" {
-			selected = cCtx.Args().First()
+		cluster := cCtx.Args().First()
+		if cluster != "" {
+			return directChange(cCtx, cluster)
 		} else {
-			selected = showClusterList(cCtx.String("context"), kc)
+			return showTUI(cCtx)
 		}
-
-		err = kc.Chclus(cCtx.String("context"), selected)
-		if err != nil {
-			return err
-		}
-
-		err = kc.Save(path)
-		if err != nil {
-			return err
-		}
-
-		return nil
 	},
 }
 
-func showClusterList(context string, conf *kconf.KubeConfig) string {
-	if context == "" {
-		context = conf.CurrentContext
+func directChange(cCtx *cli.Context, cluster string) error {
+	kc, err := kconf.Open(cCtx.String("kubeconfig"))
+	if err != nil {
+		return err
 	}
 
-	opts := make([]string, len(conf.Clusters))
-	for i := range conf.Clusters {
-		opts[i] = conf.Clusters[i].Name
+	err = kc.ChangeCluster(cCtx.String("context"), cluster)
+	if err != nil {
+		return err
 	}
 
-	title := fmt.Sprintf("change cluster for '%s' context ", context)
-	selected, _ := tui.ShowSimpleList(title, "", opts)
-	return selected
+	err = kc.Save()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func showTUI(cCtx *cli.Context) error {
+	kc, err := kconf.Open(cCtx.String("kubeconfig"))
+	if err != nil {
+		return err
+	}
+
+	model, err := NewModel(kc, cCtx.String("context"))
+	if err != nil {
+		return err
+	}
+
+	m, err := tea.NewProgram(model, tea.WithAltScreen()).Run()
+	out := m.(Model)
+
+	switch msg := out.ExitMsg.(type) {
+	case list.SaveAndQuitMsg:
+		fmt.Printf("changes saved\n")
+	case list.PickedMsg:
+		fmt.Printf("cluster changed to %s\n", msg.Picked)
+	}
+
+	return err
 }

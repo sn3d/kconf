@@ -1,11 +1,11 @@
-package usr
+package mod
 
 import (
 	"github.com/sn3d/kconf/pkg/kconf"
 	"github.com/urfave/cli/v2"
 )
 
-var modCmd = &cli.Command{
+var Cmd = &cli.Command{
 	Name:      "mod",
 	Usage:     "modify a user",
 	ArgsUsage: "[USER]",
@@ -30,7 +30,7 @@ var modCmd = &cli.Command{
 
 	// main entry point for 'export'
 	Action: func(cCtx *cli.Context) error {
-		kc, path, err := kconf.Open(cCtx.String("kubeconfig"))
+		kc, err := kconf.Open(cCtx.String("kubeconfig"))
 		if err != nil {
 			return err
 		}
@@ -46,7 +46,7 @@ var modCmd = &cli.Command{
 			return err
 		}
 
-		err = kc.Save(path)
+		err = kc.Save()
 		if err != nil {
 			return err
 		}

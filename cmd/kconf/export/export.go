@@ -26,7 +26,7 @@ var Cmd = &cli.Command{
 	Action: func(cCtx *cli.Context) error {
 		contextName := cCtx.Args().First()
 
-		kc, _, err := kconf.Open(cCtx.String("kubeconfig"))
+		kc, err := kconf.Open(cCtx.String("kubeconfig"))
 		if err != nil {
 			return err
 		}

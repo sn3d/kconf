@@ -1,11 +1,11 @@
-package ctx
+package rm
 
 import (
 	"github.com/sn3d/kconf/pkg/kconf"
 	"github.com/urfave/cli/v2"
 )
 
-var rmCmd = &cli.Command{
+var Cmd = &cli.Command{
 	Name:      "rm",
 	Usage:     "remove given context",
 	ArgsUsage: "[CONTEXT]",
@@ -20,14 +20,14 @@ var rmCmd = &cli.Command{
 	Action: func(cCtx *cli.Context) error {
 		contextName := cCtx.Args().First()
 
-		kc, path, err := kconf.Open(cCtx.String("kubeconfig"))
+		kc, err := kconf.Open(cCtx.String("kubeconfig"))
 		if err != nil {
 			return err
 		}
 
 		kc.Remove(contextName)
 
-		err = kc.Save(path)
+		err = kc.Save()
 		if err != nil {
 			return err
 		}

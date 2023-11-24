@@ -5,19 +5,6 @@ import (
 	"io/ioutil"
 )
 
-// change default namespace for given context. If given context
-// is empty string, then the current context of kubeconfig will
-// be used
-func (c *KubeConfig) Chns(context, namespace string) error {
-	ctx := c.GetContext(context)
-	if ctx == nil {
-		return fmt.Errorf("no context %s in kubeconfig", context)
-	}
-
-	ctx.Context.Namespace = namespace
-	return nil
-}
-
 // change user for given context. If context is empty string, then
 // the current context will be used
 func (c *KubeConfig) Chusr(context, user string) error {
@@ -32,23 +19,6 @@ func (c *KubeConfig) Chusr(context, user string) error {
 	}
 
 	ctx.Context.AuthInfo = user
-	return nil
-}
-
-// change cluster for given context. If context is empty string, then
-// the current context will be used
-func (c *KubeConfig) Chclus(context, cluster string) error {
-	ctx := c.GetContext(context)
-	if ctx == nil {
-		return fmt.Errorf("no context %s in kubeconfing", context)
-	}
-
-	usr := c.GetCluster(cluster)
-	if usr == nil {
-		return fmt.Errorf("no cluster %s in kubeconfig", cluster)
-	}
-
-	ctx.Context.Cluster = cluster
 	return nil
 }
 

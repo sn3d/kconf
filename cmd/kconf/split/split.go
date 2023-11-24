@@ -31,7 +31,7 @@ var Cmd = &cli.Command{
 
 	// main entry point for 'export'
 	Action: func(cCtx *cli.Context) error {
-		kc, _, err := kconf.Open(cCtx.String("kubeconfig"))
+		kc, err := kconf.Open(cCtx.String("kubeconfig"))
 		if err != nil {
 			return err
 		}
@@ -40,7 +40,7 @@ var Cmd = &cli.Command{
 
 		for i := range splitted {
 			fileName := createFileName(i, splitted[i], cCtx)
-			splitted[i].Save(fileName)
+			splitted[i].SaveAs(fileName)
 			fmt.Fprintf(os.Stdout, "%s\n", fileName)
 			if err != nil {
 				return err

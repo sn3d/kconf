@@ -28,7 +28,7 @@ var Cmd = &cli.Command{
 
 	// main entry point for 'import'
 	Action: func(cCtx *cli.Context) error {
-		kc, path, err := kconf.Open(cCtx.String("kubeconfig"))
+		kc, err := kconf.Open(cCtx.String("kubeconfig"))
 		if err != nil {
 			return err
 		}
@@ -58,7 +58,7 @@ var Cmd = &cli.Command{
 		opts := kconf.ImportOptions{As: cCtx.String("as")}
 		kc.Import(sourceCfg, &opts)
 
-		err = kc.Save(path)
+		err = kc.Save()
 		if err != nil {
 			return err
 		}

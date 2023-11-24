@@ -2,8 +2,12 @@ package ctx
 
 import (
 	"fmt"
+
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/sn3d/kconf/cmd/kconf/ctx/mv"
+	"github.com/sn3d/kconf/cmd/kconf/ctx/rm"
 	"github.com/sn3d/kconf/pkg/kconf"
-	"github.com/sn3d/kconf/pkg/tui"
+	"github.com/sn3d/kconf/pkg/tui/list"
 	"github.com/urfave/cli/v2"
 )
 
@@ -19,39 +23,61 @@ var Cmd = &cli.Command{
 	},
 
 	Subcommands: []*cli.Command{
-		mvCmd,
-		rmCmd,
+		mv.Cmd,
+		rm.Cmd,
 	},
 
-	// main entry point for 'export'
 	Action: func(cCtx *cli.Context) error {
-		kc, path, err := kconf.Open(cCtx.String("kubeconfig"))
-		if err != nil {
-			return err
-		}
-
-		var selected string
-		if cCtx.Args().First() != "" {
-			selected = cCtx.Args().First()
+		k8sContext := cCtx.Args().First()
+		if k8sContext != "" {
+			return directChange(cCtx, k8sContext)
 		} else {
-			selected = showList(path, kc)
+			return showTUI(cCtx)
 		}
-
-		if selected == "" {
-			return fmt.Errorf("nothing selected")
-		}
-
-		kc.CurrentContext = selected
-		err = kc.Save(path)
-		if err != nil {
-			return err
-		}
-
-		return nil
 	},
 }
 
-func showList(file string, conf *kconf.KubeConfig) string {
-	selected, _ := tui.ShowContextList(file, conf.CurrentContext, conf)
-	return selected
+func directChange(cCtx *cli.Context, k8sContext string) error {
+
+	kc, err := kconf.Open(cCtx.String("kubeconfig"))
+	if err != nil {
+		return err
+	}
+
+	kc.CurrentContext = k8sContext
+
+	err = kc.Save()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func showTUI(cCtx *cli.Context) error {
+	kc, err := kconf.Open(cCtx.String("kubeconfig"))
+	if err != nil {
+		return err
+	}
+
+	model, err := NewModel(kc)
+	if err != nil {
+		return err
+	}
+
+	m, err := tea.NewProgram(model, tea.WithAltScreen()).Run()
+	if err != nil {
+		return err
+	}
+
+	out := m.(Model)
+	switch msg := out.ExitMsg.(type) {
+	case list.SaveAndQuitMsg:
+		fmt.Printf("changes saved\n")
+	case list.PickedMsg:
+		fmt.Printf("context changed to %s\n", msg.Picked)
+	}
+
+	return err
+
 }

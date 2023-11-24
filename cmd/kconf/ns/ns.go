@@ -2,8 +2,10 @@ package ns
 
 import (
 	"fmt"
+
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/sn3d/kconf/pkg/kconf"
-	"github.com/sn3d/kconf/pkg/tui"
+	"github.com/sn3d/kconf/pkg/tui/list"
 	"github.com/urfave/cli/v2"
 )
 
@@ -25,51 +27,53 @@ var Cmd = &cli.Command{
 
 	// main entry point for 'export'
 	Action: func(cCtx *cli.Context) error {
-		kc, path, err := kconf.Open(cCtx.String("kubeconfig"))
-		if err != nil {
-			return err
-			fmt.Printf("Cannot open your kubeconfig. Check if you have KUBECONFIG env. variable defined, or use --kubeconfig.\n")
-		}
-
 		namespace := cCtx.Args().First()
-		if namespace == "" {
-			namespace = showNamespaceList(cCtx.String("context"), kc)
+		if namespace != "" {
+			return directChange(cCtx, namespace)
+		} else {
+			return showTUI(cCtx)
 		}
-
-		// nothing to change
-		if namespace == "" {
-			return nil
-		}
-
-		err = kc.Chns(cCtx.String("context"), namespace)
-		if err != nil {
-			return err
-		}
-
-		err = kc.Save(path)
-		if err != nil {
-			return err
-		}
-
-		return nil
 	},
 }
 
-func showNamespaceList(configContext string, kc *kconf.KubeConfig) string {
+func directChange(cCtx *cli.Context, namespace string) error {
 
-	if configContext != "" {
-		kc.CurrentContext = configContext
-	}
-
-	namespaces, err := kc.GetAllNamespaces()
+	kc, err := kconf.Open(cCtx.String("kubeconfig"))
 	if err != nil {
-		return ""
+		return err
 	}
 
-	namespace, err := tui.ShowSimpleList(kc.CurrentContext+" namespaces", "", namespaces)
+	err = kc.ChangeNamespace(cCtx.String("context"), namespace)
 	if err != nil {
-		return ""
+		return err
 	}
 
-	return namespace
+	return kc.Save()
+}
+
+func showTUI(cCtx *cli.Context) error {
+	kc, err := kconf.Open(cCtx.String("kubeconfig"))
+	if err != nil {
+		return err
+	}
+
+	model, err := NewModel(kc, cCtx.String("context"))
+	if err != nil {
+		return err
+	}
+
+	m, err := tea.NewProgram(model, tea.WithAltScreen()).Run()
+	if err != nil {
+		return err
+	}
+
+	out := m.(Model)
+	switch msg := out.ExitMsg.(type) {
+	case list.SaveAndQuitMsg:
+		fmt.Printf("changes saved\n")
+	case list.PickedMsg:
+		fmt.Printf("namespace changed to %s\n", msg.Picked)
+	}
+
+	return err
 }

@@ -1,27 +1,22 @@
 package kconf
 
 import (
-	"bytes"
-	"context"
 	"encoding/base64"
 	"fmt"
 	"io"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/tools/clientcmd"
 	"os"
 	"path/filepath"
 	"sort"
 	"strings"
 
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 	apilatest "k8s.io/client-go/tools/clientcmd/api/latest"
 	apiv1 "k8s.io/client-go/tools/clientcmd/api/v1"
 )
 
 type KubeConfig struct {
 	*apiv1.Config
+	path string
 }
 
 func New() *KubeConfig {
@@ -43,9 +38,8 @@ func New() *KubeConfig {
 // If given file is empty string, the function will load kubeconfig
 // from KUBECONFIG env. variable. If KUBECONFIG variable is not set,
 // then the function open default ~/.kube/config file.
-func Open(file string) (kc *KubeConfig, path string, err error) {
+func Open(path string) (kc *KubeConfig, err error) {
 	// figureout what file path need to be open
-	path = file
 	if path == "" {
 		path = os.Getenv("KUBECONFIG")
 		if path == "" {
@@ -63,15 +57,16 @@ func Open(file string) (kc *KubeConfig, path string, err error) {
 	// read the file and parse KubeConfig
 	data, err := os.ReadFile(path)
 	if err != nil {
-		return nil, path, &OpenError{original: err, path: path}
+		return nil, &OpenError{original: err, path: path}
 	}
 
 	kc, err = OpenData(data)
 	if err != nil {
-		return nil, path, &OpenError{original: err, path: path}
+		return nil, &OpenError{original: err, path: path}
 	}
 
-	return kc, path, nil
+	kc.path = path
+	return kc, nil
 }
 
 // OpenBase64 will decode input data from base64 and parse it
@@ -110,20 +105,28 @@ func OpenData(data []byte) (*KubeConfig, error) {
 	return &KubeConfig{Config: cfg}, nil
 }
 
-// save the KubeConfig into file as YAML
-func (c *KubeConfig) Save(filename string) error {
-	fd, err := os.Create(filename)
+// save the KubeConfig into original file as YAML
+// This function works only when KubeConfig was open via Open() function
+func (kc *KubeConfig) Save() error {
+	if kc.path == "" {
+		return fmt.Errorf("The path is not set.Use the SaveAs() method instead")
+	}
+	return kc.SaveAs(kc.path)
+}
+
+func (kc *KubeConfig) SaveAs(path string) error {
+	fd, err := os.Create(path)
 	if err != nil {
 		return err
 	}
 	defer fd.Close()
-	return c.WriteTo(fd)
+	return kc.WriteTo(fd)
 }
 
 // write the KubeConfig into writer as YAML. It's used when
 // you need print the KubeConfig YAML into standard output etc.
-func (c *KubeConfig) WriteTo(w io.Writer) error {
-	err := apilatest.Codec.Encode(c.Config, w)
+func (kc *KubeConfig) WriteTo(w io.Writer) error {
+	err := apilatest.Codec.Encode(kc.Config, w)
 	if err != nil {
 		return err
 	} else {
@@ -131,27 +134,9 @@ func (c *KubeConfig) WriteTo(w io.Writer) error {
 	}
 }
 
-// This function converts KubeConfig into clientcmdapi.Config. The client-go library
-// comes with two Config-s. One is in clientcmd/api and one is in clientcmd/api/v1 package.
-// The current Kubeconfig is using clientcmd/api/v1. But clientcmd/api is used for establishing
-// k8s client connection. So this function converts KubeConfig into clientcmdapi.Config.
-//
-// Because there is no better way, we do conversion like: we write the current Kubeconfig into
-// memory as YAML, and then we load the YAML into clientcmdapi.Config. This is not very effective
-// but it works.
-func (c *KubeConfig) ConvertToClientcmdApiConfig() (*clientcmdapi.Config, error) {
-	buf := new(bytes.Buffer)
-	c.WriteTo(buf)
-	clientcmdApiConfig, err := clientcmd.Load(buf.Bytes())
-	if err != nil {
-		return nil, err
-	}
-	return clientcmdApiConfig, nil
-}
-
 // Import all users, contexts and clusters from src kubeconfig
 // to current kubeconfig
-func (c *KubeConfig) Import(src *KubeConfig, opts *ImportOptions) {
+func (kc *KubeConfig) Import(src *KubeConfig, opts *ImportOptions) {
 
 	// If 'As' option is set and there is only one context, then it's
 	// renamed to 'As'
@@ -162,23 +147,23 @@ func (c *KubeConfig) Import(src *KubeConfig, opts *ImportOptions) {
 		src.Rename(src.Contexts[0].Name, opts.As)
 	}
 
-	c.addToContexts(src.Contexts...)
-	c.addToClusters(src.Clusters...)
-	c.addToUsers(src.AuthInfos...)
+	kc.addToContexts(src.Contexts...)
+	kc.addToClusters(src.Clusters...)
+	kc.addToUsers(src.AuthInfos...)
 }
 
 // Export returns you new KubeConfig where is given context
 // with required User and Cluster.
 // If contextName is empty string, then the current context will be
 // exported
-func (cfg *KubeConfig) Export(contextName string, opts *ExportOptions) (*KubeConfig, error) {
+func (kc *KubeConfig) Export(contextName string, opts *ExportOptions) (*KubeConfig, error) {
 	if contextName == "" {
-		contextName = cfg.CurrentContext
+		contextName = kc.CurrentContext
 	}
 
 	exported := New()
 	exported.CurrentContext = contextName
-	ctx, cluster, user := cfg.getFullContext(contextName)
+	ctx, cluster, user := kc.getFullContext(contextName)
 	if ctx == nil {
 		return exported, fmt.Errorf("the '%s' is missing in kubeconfig", contextName)
 	}
@@ -205,88 +190,24 @@ func (cfg *KubeConfig) Export(contextName string, opts *ExportOptions) (*KubeCon
 	return exported, nil
 }
 
-// completely remove context by name and context's
-// cluster and user
-func (c *KubeConfig) Remove(contextName string) {
-	ctx := c.GetContext(contextName)
-	if ctx == nil {
-		return
-	}
-
-	c.removeFromClusters(ctx.Context.Cluster)
-	c.removeFromUsers(ctx.Context.AuthInfo)
-	c.removeFromContexts(contextName)
-}
-
-// rename context and context's cluster and user. Both
-// cluster and user will have name same as is new name
-// of context
-func (c *KubeConfig) Rename(src, dest string) {
-	ctx := c.GetContext(src)
-	if ctx == nil {
-		return
-	}
-
-	c.renameCluster(ctx.Context.Cluster, dest)
-	ctx.Context.Cluster = dest
-
-	c.renameUser(ctx.Context.AuthInfo, dest)
-	ctx.Context.AuthInfo = dest
-
-	c.renameContext(src, dest)
-}
-
 // split one kubeconfig into smaller kubeconfig pieces for
 // each context
-func (c *KubeConfig) Split() []*KubeConfig {
-	result := make([]*KubeConfig, len(c.Contexts))
-	for i := range c.Contexts {
+func (kc *KubeConfig) Split() []*KubeConfig {
+	result := make([]*KubeConfig, len(kc.Contexts))
+	for i := range kc.Contexts {
 		result[i] = New()
-		result[i].addToContexts(c.Contexts[i])
-		result[i].CurrentContext = c.Contexts[i].Name
+		result[i].addToContexts(kc.Contexts[i])
+		result[i].CurrentContext = kc.Contexts[i].Name
 
-		usr := c.GetUser(c.Contexts[i].Context.AuthInfo)
+		usr := kc.GetUser(kc.Contexts[i].Context.AuthInfo)
 		result[i].addToUsers(*usr)
 
-		cluster := c.GetCluster(c.Contexts[i].Context.Cluster)
+		cluster := kc.GetCluster(kc.Contexts[i].Context.Cluster)
 		result[i].addToClusters(*cluster)
 	}
 	return result
 }
 
-func (c *KubeConfig) GetAllNamespaces() ([]string, error) {
-
-	// get k8s client for given kubeconfig and context
-	restCfg, err := clientcmd.BuildConfigFromKubeconfigGetter("", func() (*clientcmdapi.Config, error) {
-		apiConfig, err := c.ConvertToClientcmdApiConfig()
-		if err != nil {
-			return nil, err
-		}
-
-		apiConfig.CurrentContext = c.CurrentContext
-		return apiConfig, nil
-	})
-
-	if err != nil {
-		return []string{}, err
-	}
-
-	k8sClient, err := kubernetes.NewForConfig(restCfg)
-	if err != nil {
-		return []string{}, err
-	}
-
-	// get all namespaces
-	namespaces, err := k8sClient.CoreV1().Namespaces().List(context.Background(), metav1.ListOptions{})
-	if err != nil {
-		return []string{}, err
-	}
-
-	result := make([]string, len(namespaces.Items))
-	for i, ns := range namespaces.Items {
-		fmt.Println(ns.Name)
-		result[i] = ns.Name
-	}
-
-	return result, nil
+func (kc *KubeConfig) GetPath() string {
+	return kc.path
 }

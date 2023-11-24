@@ -2,8 +2,11 @@ package usr
 
 import (
 	"fmt"
+
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/sn3d/kconf/cmd/kconf/usr/mod"
 	"github.com/sn3d/kconf/pkg/kconf"
-	"github.com/sn3d/kconf/pkg/tui"
+	"github.com/sn3d/kconf/pkg/tui/list"
 	"github.com/urfave/cli/v2"
 )
 
@@ -24,48 +27,56 @@ var Cmd = &cli.Command{
 	},
 
 	Subcommands: []*cli.Command{
-		modCmd,
+		mod.Cmd,
 	},
 
-	// main entry point for 'export'
+	// main entry point
 	Action: func(cCtx *cli.Context) error {
-		kc, path, err := kconf.Open(cCtx.String("kubeconfig"))
-		if err != nil {
-			return err
-		}
-
-		var selected string
-		if cCtx.Args().First() != "" {
-			selected = cCtx.Args().First()
+		user := cCtx.Args().First()
+		if user != "" {
+			return directChange(cCtx, user)
 		} else {
-			selected = showUserList(cCtx.String("context"), kc)
+			return showTUI(cCtx)
 		}
 
-		err = kc.Chusr(cCtx.String("context"), selected)
-		if err != nil {
-			return err
-		}
-
-		err = kc.Save(path)
-		if err != nil {
-			return err
-		}
-
-		return nil
 	},
 }
 
-func showUserList(context string, conf *kconf.KubeConfig) string {
-	if context == "" {
-		context = conf.CurrentContext
+func directChange(cCtx *cli.Context, user string) error {
+
+	kc, err := kconf.Open(cCtx.String("kubeconfig"))
+	if err != nil {
+		return err
 	}
 
-	opts := make([]string, len(conf.AuthInfos))
-	for i := range conf.AuthInfos {
-		opts[i] = conf.AuthInfos[i].Name
+	err = kc.ChangeUser(cCtx.String("context"), user)
+	if err != nil {
+		return err
 	}
 
-	title := fmt.Sprintf("change user for '%s' context ", context)
-	selected, _ := tui.ShowSimpleList(title, "", opts)
-	return selected
+	return kc.Save()
+}
+
+func showTUI(cCtx *cli.Context) error {
+	kc, err := kconf.Open(cCtx.String("kubeconfig"))
+	if err != nil {
+		return err
+	}
+
+	model, err := NewModel(kc, cCtx.String("context"))
+	if err != nil {
+		return err
+	}
+
+	m, err := tea.NewProgram(model, tea.WithAltScreen()).Run()
+
+	out := m.(Model)
+	switch msg := out.ExitMsg.(type) {
+	case list.SaveAndQuitMsg:
+		fmt.Printf("changes saved\n")
+	case list.PickedMsg:
+		fmt.Printf("user changed to %s\n", msg.Picked)
+	}
+
+	return err
 }

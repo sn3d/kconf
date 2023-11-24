@@ -1,11 +1,11 @@
-package ctx
+package mv
 
 import (
 	"github.com/sn3d/kconf/pkg/kconf"
 	"github.com/urfave/cli/v2"
 )
 
-var mvCmd = &cli.Command{
+var Cmd = &cli.Command{
 	Name:      "mv",
 	Usage:     "move source context to destination context",
 	ArgsUsage: "[SOURCE] [DEST]",
@@ -21,14 +21,14 @@ var mvCmd = &cli.Command{
 		src := cCtx.Args().Get(0)
 		dest := cCtx.Args().Get(1)
 
-		kc, path, err := kconf.Open(cCtx.String("kubeconfig"))
+		kc, err := kconf.Open(cCtx.String("kubeconfig"))
 		if err != nil {
 			return err
 		}
 
 		kc.Rename(src, dest)
 
-		err = kc.Save(path)
+		err = kc.Save()
 		if err != nil {
 			return err
 		}

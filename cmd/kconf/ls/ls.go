@@ -28,7 +28,7 @@ var Cmd = &cli.Command{
 	Action: func(cCtx *cli.Context) error {
 		longList := cCtx.Bool("l")
 
-		kc, _, err := kconf.Open(cCtx.String("kubeconfig"))
+		kc, err := kconf.Open(cCtx.String("kubeconfig"))
 		if err != nil {
 			return err
 		}

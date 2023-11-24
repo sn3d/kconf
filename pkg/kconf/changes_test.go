@@ -11,13 +11,13 @@ func Test_Chns(t *testing.T) {
 	InitTestdata()
 
 	//GIVEN: existing kubeconfig with current context set
-	config, _, err := kconf.Open(Abs("changes-test.yaml"))
+	config, err := kconf.Open(Abs("changes-test.yaml"))
 	if err != nil {
 		t.FailNow()
 	}
 
 	//WHEN: we change namespace for empty "" context
-	config.Chns("", "changed-ns")
+	config.ChangeNamespace("", "changed-ns")
 
 	//THEN: the namespace for current contex should be changed
 	ctx := config.GetContext(config.CurrentContext)
@@ -30,7 +30,7 @@ func Test_Chusr(t *testing.T) {
 	InitTestdata()
 
 	//GIVEN: existing kubeconfig with 2 users
-	config, _, err := kconf.Open(Abs("changes-test.yaml"))
+	config, err := kconf.Open(Abs("changes-test.yaml"))
 	if err != nil {
 		t.FailNow()
 	}
@@ -45,17 +45,17 @@ func Test_Chusr(t *testing.T) {
 	}
 }
 
-func Test_Chclus(t *testing.T) {
+func Test_ChangeCluster(t *testing.T) {
 	InitTestdata()
 
 	//GIVEN: existing kubeconfig with 2 clusters
-	config, _, err := kconf.Open(Abs("changes-test.yaml"))
+	config, err := kconf.Open(Abs("changes-test.yaml"))
 	if err != nil {
 		t.FailNow()
 	}
 
 	//WHEN: we change user for current context to another
-	config.Chclus("", "blue-cluster")
+	config.ChangeCluster("", "blue-cluster")
 
 	//THEN: the context should have user changed
 	ctx := config.GetContext("")
@@ -68,7 +68,7 @@ func Test_Clustermod(t *testing.T) {
 	InitTestdata()
 
 	//GIVEN: existing kubeconfig with cluster
-	config, _, err := kconf.Open(Abs("changes-test.yaml"))
+	config, err := kconf.Open(Abs("changes-test.yaml"))
 	if err != nil {
 		t.FailNow()
 	}
@@ -89,7 +89,7 @@ func Test_Usermod(t *testing.T) {
 	InitTestdata()
 
 	//GIVEN: existing kubeconfig with cluster
-	config, _, err := kconf.Open(Abs("changes-test.yaml"))
+	config, err := kconf.Open(Abs("changes-test.yaml"))
 	if err != nil {
 		t.FailNow()
 	}
