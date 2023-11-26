@@ -57,12 +57,12 @@ func NewModel(kc *kconf.KubeConfig, context string) (*Model, error) {
 		Rename: key.NewBinding(
 			key.WithDisabled(),
 		),
-		SaveAndQuit: key.NewBinding(
+		SaveAndClose: key.NewBinding(
 			key.WithDisabled(),
 		),
-		Terminate: key.NewBinding(
-			key.WithKeys("ctrl+c"),
-			key.WithHelp("ctrl+c", "cancel changes and terminate"),
+		Close: key.NewBinding(
+			key.WithKeys("esc"),
+			key.WithHelp("esc", "exit"),
 		),
 	})
 
@@ -80,13 +80,24 @@ func (m Model) View() string {
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case list.PickedMsg:
-		m.kconfig.ChangeNamespace(m.context, msg.Picked)
-		m.kconfig.Save()
-		m.ExitMsg = msg
-		return m, tea.Quit
+		return m, m.onPicked(msg)
+	case list.CloseMsg:
+		return m, m.onClose(msg)
 	}
 
 	var cmd tea.Cmd
 	m.list, cmd = m.list.Update(msg)
 	return m, cmd
+}
+
+func (m *Model) onPicked(msg list.PickedMsg) tea.Cmd {
+	m.kconfig.ChangeNamespace(m.context, msg.Picked)
+	m.kconfig.Save()
+	m.ExitMsg = msg
+	return tea.Quit
+}
+
+func (m *Model) onClose(msg list.CloseMsg) tea.Cmd {
+	m.ExitMsg = msg
+	return tea.Quit
 }

@@ -53,13 +53,13 @@ func NewModel(kc *kconf.KubeConfig, context string) (*Model, error) {
 			key.WithKeys("r"),
 			key.WithHelp("r", "rename cluster"),
 		),
-		SaveAndQuit: key.NewBinding(
+		SaveAndClose: key.NewBinding(
 			key.WithKeys("q"),
 			key.WithHelp("q", "save and quit"),
 		),
-		Terminate: key.NewBinding(
-			key.WithKeys("ctrl+c"),
-			key.WithHelp("ctrl+c", "quit without saving"),
+		Close: key.NewBinding(
+			key.WithKeys("esc"),
+			key.WithHelp("esc", "quit without saving"),
 		),
 	})
 
@@ -77,21 +77,35 @@ func (m Model) View() string {
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case list.PickedMsg:
-		m.kconfig.ChangeCluster(m.context, msg.Picked)
-		m.kconfig.Save()
-		m.ExitMsg = msg
-		return m, tea.Quit
+		return m, m.onPicked(msg)
 	case list.RenameMsg:
-		userItem := msg.Selected.(ClusterItem)
-		m.kconfig.RenameCluster(userItem.Cluster.Name, msg.NewValue)
-		return m, nil
-	case list.SaveAndQuitMsg:
-		m.kconfig.Save()
-		m.ExitMsg = msg
-		return m, tea.Quit
+		return m, m.onRename(msg)
+	case list.CloseMsg:
+		return m, m.onClose(msg)
 	}
 
 	var cmd tea.Cmd
 	m.list, cmd = m.list.Update(msg)
 	return m, cmd
+}
+
+func (m *Model) onPicked(msg list.PickedMsg) tea.Cmd {
+	m.kconfig.ChangeCluster(m.context, msg.Picked)
+	m.kconfig.Save()
+	m.ExitMsg = msg
+	return tea.Quit
+}
+
+func (m *Model) onRename(msg list.RenameMsg) tea.Cmd {
+	userItem := msg.Selected.(ClusterItem)
+	m.kconfig.RenameCluster(userItem.Cluster.Name, msg.NewValue)
+	return nil
+}
+
+func (m *Model) onClose(msg list.CloseMsg) tea.Cmd {
+	if !msg.Aborted {
+		m.kconfig.Save()
+	}
+	m.ExitMsg = msg
+	return tea.Quit
 }

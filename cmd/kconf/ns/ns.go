@@ -69,8 +69,10 @@ func showTUI(cCtx *cli.Context) error {
 
 	out := m.(Model)
 	switch msg := out.ExitMsg.(type) {
-	case list.SaveAndQuitMsg:
-		fmt.Printf("changes saved\n")
+	case list.CloseMsg:
+		if !msg.Aborted {
+			fmt.Printf("changes saved\n")
+		}
 	case list.PickedMsg:
 		fmt.Printf("namespace changed to %s\n", msg.Picked)
 	}

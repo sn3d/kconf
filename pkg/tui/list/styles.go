@@ -8,7 +8,7 @@ type ItemStyle struct {
 	Description lipgloss.Style
 }
 
-func DefaultItemStyle() ItemStyle {
+func DefaultStyle() ItemStyle {
 	return ItemStyle{
 		Picked:      lipgloss.NewStyle().Foreground(lipgloss.Color("220")),
 		Selected:    lipgloss.NewStyle().Foreground(lipgloss.Color("170")),

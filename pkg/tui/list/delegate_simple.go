@@ -8,6 +8,10 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
+type ItemWithTitle interface {
+	Title() string
+}
+
 type SimpleDelegate struct {
 	picked int
 	style  ItemStyle
@@ -16,7 +20,7 @@ type SimpleDelegate struct {
 func NewSimpleDelegate() *SimpleDelegate {
 	return &SimpleDelegate{
 		picked: 0,
-		style:  DefaultItemStyle(),
+		style:  DefaultStyle(),
 	}
 }
 

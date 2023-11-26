@@ -9,6 +9,7 @@ import (
 
 	"github.com/sn3d/kconf/cmd/kconf/ns"
 	"github.com/sn3d/kconf/pkg/kconf"
+	"github.com/sn3d/kconf/pkg/tui/components/confirmation"
 	"github.com/sn3d/kconf/pkg/tui/list"
 )
 
@@ -34,7 +35,7 @@ func NewModel(kc *kconf.KubeConfig) (*Model, error) {
 	model.kconfig = kc
 
 	// convert clusters to items
-	items := make([]bubblelist.Item, len(kc.AuthInfos))
+	items := make([]bubblelist.Item, len(kc.Contexts))
 	pickedIndex := -1
 	for i := range kc.Contexts {
 		items[i] = ContextItem{
@@ -54,7 +55,7 @@ func NewModel(kc *kconf.KubeConfig) (*Model, error) {
 	model.list.SetKeys(list.KeyMap{
 		Pick: key.NewBinding(
 			key.WithKeys("enter"),
-			key.WithHelp("enter", "set cluster"),
+			key.WithHelp("enter", "set default context"),
 		),
 		ChangeNs: key.NewBinding(
 			key.WithKeys("n"),
@@ -62,15 +63,19 @@ func NewModel(kc *kconf.KubeConfig) (*Model, error) {
 		),
 		Rename: key.NewBinding(
 			key.WithKeys("r"),
-			key.WithHelp("r", "rename cluster"),
+			key.WithHelp("r", "rename"),
 		),
-		SaveAndQuit: key.NewBinding(
+		Delete: key.NewBinding(
+			key.WithKeys("d"),
+			key.WithHelp("d", "delete"),
+		),
+		SaveAndClose: key.NewBinding(
 			key.WithKeys("q"),
 			key.WithHelp("q", "save and quit"),
 		),
-		Terminate: key.NewBinding(
-			key.WithKeys("ctrl+c", "esc"),
-			key.WithHelp("ctrl+c", "quit without saving"),
+		Close: key.NewBinding(
+			key.WithKeys("esc"),
+			key.WithHelp("esc", "quit without saving"),
 		),
 	})
 
@@ -102,21 +107,15 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m Model) updateContext(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case list.PickedMsg:
-		m.kconfig.CurrentContext = msg.Picked
-		m.kconfig.Save()
-		m.ExitMsg = msg
-		return m, tea.Quit
+		return m, m.onPickedContext(msg)
 	case list.RenameMsg:
-		item := msg.Selected.(ContextItem)
-		m.kconfig.RenameContext(item.Context.Name, msg.NewValue)
-		return m, nil
+		return m, m.onRenamed(msg)
+	case confirmation.SubmittedMsg:
+		return m, m.onDeleteContext(msg)
 	case list.ChangeNsMsg:
-		m.SwithToNsView()
-		return m, tea.ClearScreen
-	case list.SaveAndQuitMsg:
-		m.kconfig.Save()
-		m.ExitMsg = msg
-		return m, tea.Quit
+		return m, m.onNamespaceView(msg)
+	case list.CloseMsg:
+		return m, m.onClose(msg)
 	}
 
 	var cmd tea.Cmd
@@ -128,13 +127,9 @@ func (m Model) updateContext(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m Model) updateNamespace(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case list.PickedMsg:
-		ctxItem := m.list.SelectedItem().(ContextItem)
-		m.kconfig.ChangeNamespace(ctxItem.Title(), msg.Picked)
-		m.SwitchToCtxView()
-		return m, tea.ClearScreen
-	case list.ExitMsg:
-		m.SwitchToCtxView()
-		return m, tea.ClearScreen
+		return m, m.onPickedNamespace(msg)
+	case list.CloseMsg:
+		return m, m.onCloseNamespace(msg)
 	}
 
 	var cmd tea.Cmd
@@ -142,14 +137,14 @@ func (m Model) updateNamespace(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func (m *Model) SwithToNsView() {
+func (m *Model) onNamespaceView(msg list.ChangeNsMsg) tea.Cmd {
 	kc := m.kconfig
 
 	// convert namespaces to items
 	selectedItem := m.list.SelectedItem().(ContextItem)
 	namespaces, err := kc.GetAllNamespaces(selectedItem.Context.Name)
 	if err != nil {
-		return
+		return nil
 	}
 
 	items := make([]bubblelist.Item, len(namespaces))
@@ -169,13 +164,61 @@ func (m *Model) SwithToNsView() {
 	m.secList.Pick(pickedIndex)
 
 	m.secList.SetKeys(list.KeyMap{
-		Pick: key.NewBinding(key.WithKeys("enter")),
-		Exit: key.NewBinding(key.WithKeys("esc", "q")),
+		Pick:  key.NewBinding(key.WithKeys("enter"), key.WithHelp("enter", "select namespace")),
+		Close: key.NewBinding(key.WithKeys("esc", "q"), key.WithHelp("q/esc", "back")),
 	})
 
 	m.state = NamespaceView
+
+	return tea.ClearScreen
 }
 
 func (m *Model) SwitchToCtxView() {
 	m.state = ContextView
+}
+
+func (m *Model) onDeleteContext(msg confirmation.SubmittedMsg) tea.Cmd {
+	if msg.Confirmed {
+		item := m.list.SelectedItem().(list.ItemWithTitle)
+		m.kconfig.Remove(item.Title())
+		m.list.RemoveSelected()
+	}
+
+	var cmd tea.Cmd
+	m.list, cmd = m.list.Update(msg)
+	return cmd
+}
+
+func (m *Model) onPickedContext(msg list.PickedMsg) tea.Cmd {
+	m.kconfig.CurrentContext = msg.Picked
+	m.kconfig.Save()
+	m.ExitMsg = msg
+	return tea.Quit
+}
+
+func (m *Model) onRenamed(msg list.RenameMsg) tea.Cmd {
+	item := msg.Selected.(ContextItem)
+	m.kconfig.RenameContext(item.Context.Name, msg.NewValue)
+	return nil
+}
+
+func (m *Model) onClose(msg list.CloseMsg) tea.Cmd {
+	if !msg.Aborted {
+		m.kconfig.Save()
+	}
+	m.ExitMsg = msg
+	return tea.Quit
+}
+
+func (m *Model) onPickedNamespace(msg list.PickedMsg) tea.Cmd {
+	ctxItem := m.list.SelectedItem().(ContextItem)
+	m.kconfig.ChangeNamespace(ctxItem.Title(), msg.Picked)
+	m.SwitchToCtxView()
+	return tea.ClearScreen
+
+}
+
+func (m *Model) onCloseNamespace(msg list.CloseMsg) tea.Cmd {
+	m.SwitchToCtxView()
+	return tea.ClearScreen
 }
