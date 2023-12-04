@@ -3,9 +3,9 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/sn3d/kconf)](https://goreportcard.com/report/github.com/sn3d/kconf)
 [![codebeat badge](https://codebeat.co/badges/4d9db5e8-918f-4561-a9de-5c27c1f509ad)](https://codebeat.co/projects/github-com-sn3d-kconf-main)
 
-
-The `kconf` is my swiss army knife for kubeconfigs and replacement for combo 
-of `kubectx` + `kubens` with terminal UI.
+The 'kconf' serves as my Swiss Army knife for managing kubeconfigs, contexts 
+and replacing the need for a combination of 'kubectx' and 'kubens' with its 
+terminal UI.
 
 ![demo GIF](img/demo.gif)
 
