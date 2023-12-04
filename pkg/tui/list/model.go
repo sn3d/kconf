@@ -184,7 +184,7 @@ func (m *Model) toListing() tea.Cmd {
 func (m *Model) onRename() tea.Cmd {
 	m.state = RenameState
 	selectedItem := m.list.Items()[m.list.Index()].(ItemWithTitle)
-	m.prompt.Placeholder = selectedItem.Title()
+	m.prompt.Placeholder = fmt.Sprintf("rename %s to...", selectedItem.Title())
 	m.prompt.SetValue("")
 	m.prompt.Focus()
 	return nil
