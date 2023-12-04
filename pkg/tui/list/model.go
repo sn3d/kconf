@@ -37,7 +37,7 @@ func New(items []bubblelist.Item, delegate PickerDelegate) Model {
 	model := Model{}
 	model.listPicker = delegate
 
-	model.list = bubblelist.New(items, delegate, 40, 20)
+	model.list = bubblelist.New(items, delegate, 40, 10)
 	model.list.SetShowStatusBar(false)
 	model.list.SetShowHelp(false)
 	model.list.DisableQuitKeybindings()
@@ -67,10 +67,6 @@ func (m *Model) SetTitle(title string) {
 
 func (m *Model) SetKeys(keys KeyMap) {
 	m.Keys = keys
-	//m.Keys.Help = key.NewBinding(
-	//	key.WithKeys("?"),
-	//	key.WithHelp("?", "more"),
-	//)
 }
 
 func (m *Model) Pick(index int) {
@@ -185,9 +181,6 @@ func (m *Model) onRename() tea.Cmd {
 	m.prompt.Placeholder = selectedItem.Title()
 	m.prompt.SetValue("")
 	m.prompt.Focus()
-
-	m.list.SetHeight(20)
-
 	return nil
 }
 
@@ -213,9 +206,6 @@ func (m *Model) onDelete() tea.Cmd {
 	selectedItem := m.list.Items()[m.list.Index()].(ItemWithTitle)
 	msg := fmt.Sprintf("Do you want to delete '%s' ?", selectedItem.Title())
 	m.confirmation = confirmation.New("DELETE", msg)
-
-	m.list.SetHeight(20)
-
 	return nil
 }
 
