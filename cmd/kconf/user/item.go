@@ -1,4 +1,4 @@
-package usr
+package user
 
 import apiv1 "k8s.io/client-go/tools/clientcmd/api/v1"
 

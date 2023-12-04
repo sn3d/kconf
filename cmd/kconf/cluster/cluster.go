@@ -1,10 +1,10 @@
-package clst
+package cluster
 
 import (
 	"fmt"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/sn3d/kconf/cmd/kconf/clst/mod"
+	"github.com/sn3d/kconf/cmd/kconf/cluster/mod"
 	"github.com/sn3d/kconf/pkg/kconf"
 	"github.com/sn3d/kconf/pkg/tui/list"
 
@@ -12,8 +12,8 @@ import (
 )
 
 var Cmd = &cli.Command{
-	Name:      "clst",
-	Usage:     "change cluster for context",
+	Name:      "cluster",
+	Usage:     "cluster commands",
 	ArgsUsage: "[CLUSTER]",
 	Flags: []cli.Flag{
 		&cli.StringFlag{

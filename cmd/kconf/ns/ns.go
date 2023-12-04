@@ -11,7 +11,7 @@ import (
 
 var Cmd = &cli.Command{
 	Name:      "ns",
-	Usage:     "change default namespace for context",
+	Usage:     "set default namespace for current context",
 	ArgsUsage: "[NAMESPACE]",
 	Flags: []cli.Flag{
 		&cli.StringFlag{

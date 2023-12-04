@@ -9,7 +9,7 @@ import (
 
 var Cmd = &cli.Command{
 	Name:      "export",
-	Usage:     "Export context with user and cluster from your configuration",
+	Usage:     "export context with user and cluster from your configuration",
 	ArgsUsage: "[contextName]",
 	Flags: []cli.Flag{
 		&cli.StringFlag{

@@ -1,57 +1,60 @@
-package ctx
+package user
 
 import (
 	"fmt"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/sn3d/kconf/cmd/kconf/ctx/mv"
-	"github.com/sn3d/kconf/cmd/kconf/ctx/rm"
+	"github.com/sn3d/kconf/cmd/kconf/user/mod"
 	"github.com/sn3d/kconf/pkg/kconf"
 	"github.com/sn3d/kconf/pkg/tui/list"
 	"github.com/urfave/cli/v2"
 )
 
 var Cmd = &cli.Command{
-	Name:      "ctx",
-	Usage:     "change current context",
-	ArgsUsage: "[CONTEXT]",
+	Name:      "user",
+	Usage:     "user commands",
+	ArgsUsage: "[USER]",
 	Flags: []cli.Flag{
 		&cli.StringFlag{
 			Name:  "kubeconfig",
 			Usage: "path to kubeconfig from where export context",
 		},
+		&cli.StringFlag{
+			Name:    "context",
+			Aliases: []string{"c"},
+			Usage:   "context for which you want to change user",
+		},
 	},
 
 	Subcommands: []*cli.Command{
-		mv.Cmd,
-		rm.Cmd,
+		mod.Cmd,
 	},
 
+	// main entry point
 	Action: func(cCtx *cli.Context) error {
-		k8sContext := cCtx.Args().First()
-		if k8sContext != "" {
-			return directChange(cCtx, k8sContext)
+		user := cCtx.Args().First()
+		if user != "" {
+			return directChange(cCtx, user)
 		} else {
 			return showTUI(cCtx)
 		}
+
 	},
 }
 
-func directChange(cCtx *cli.Context, k8sContext string) error {
+func directChange(cCtx *cli.Context, user string) error {
 
 	kc, err := kconf.Open(cCtx.String("kubeconfig"))
 	if err != nil {
 		return err
 	}
 
-	kc.CurrentContext = k8sContext
-
-	err = kc.Save()
+	err = kc.ChangeUser(cCtx.String("context"), user)
 	if err != nil {
 		return err
 	}
 
-	return nil
+	return kc.Save()
 }
 
 func showTUI(cCtx *cli.Context) error {
@@ -60,15 +63,12 @@ func showTUI(cCtx *cli.Context) error {
 		return err
 	}
 
-	model, err := NewModel(kc)
+	model, err := NewModel(kc, cCtx.String("context"))
 	if err != nil {
 		return err
 	}
 
 	m, err := tea.NewProgram(model, tea.WithAltScreen()).Run()
-	if err != nil {
-		return err
-	}
 
 	out := m.(Model)
 	switch msg := out.ExitMsg.(type) {
@@ -77,9 +77,8 @@ func showTUI(cCtx *cli.Context) error {
 			fmt.Printf("changes saved\n")
 		}
 	case list.PickedMsg:
-		fmt.Printf("context changed to %s\n", msg.Picked)
+		fmt.Printf("user changed to %s\n", msg.Picked)
 	}
 
 	return err
-
 }

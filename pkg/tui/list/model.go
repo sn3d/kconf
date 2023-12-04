@@ -46,6 +46,7 @@ func New(items []bubblelist.Item, delegate PickerDelegate) Model {
 	model.prompt.CharLimit = 124
 
 	model.help = help.New()
+	model.help.ShowAll = true
 
 	return model
 }
@@ -66,10 +67,10 @@ func (m *Model) SetTitle(title string) {
 
 func (m *Model) SetKeys(keys KeyMap) {
 	m.Keys = keys
-	m.Keys.Help = key.NewBinding(
-		key.WithKeys("?"),
-		key.WithHelp("?", "more"),
-	)
+	//m.Keys.Help = key.NewBinding(
+	//	key.WithKeys("?"),
+	//	key.WithHelp("?", "more"),
+	//)
 }
 
 func (m *Model) Pick(index int) {
@@ -119,8 +120,6 @@ func (m Model) updateListing(msg tea.Msg) (Model, tea.Cmd) {
 			return m, m.onRename()
 		case key.Matches(msg, m.Keys.Delete):
 			return m, m.onDelete()
-		case key.Matches(msg, m.Keys.Help):
-			return m, m.onHelp()
 		case key.Matches(msg, m.Keys.ChangeNs):
 			return m, m.onChangeNs()
 		case key.Matches(msg, m.Keys.Pick):
@@ -188,7 +187,6 @@ func (m *Model) onRename() tea.Cmd {
 	m.prompt.Focus()
 
 	m.list.SetHeight(20)
-	m.help.ShowAll = false
 
 	return nil
 }
@@ -217,18 +215,7 @@ func (m *Model) onDelete() tea.Cmd {
 	m.confirmation = confirmation.New("DELETE", msg)
 
 	m.list.SetHeight(20)
-	m.help.ShowAll = false
 
-	return nil
-}
-
-func (m *Model) onHelp() tea.Cmd {
-	m.help.ShowAll = !m.help.ShowAll
-	if m.help.ShowAll {
-		m.list.SetHeight(m.list.Height() - 2)
-	} else {
-		m.list.SetHeight(m.list.Height() + 2)
-	}
 	return nil
 }
 

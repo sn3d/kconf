@@ -1,4 +1,4 @@
-package clst
+package user
 
 import (
 	"fmt"
@@ -23,16 +23,16 @@ func NewModel(kc *kconf.KubeConfig, context string) (*Model, error) {
 		context = kc.CurrentContext
 	}
 
-	// convert clusters to items
+	// convert auth infos(users) to list items
 	items := make([]bubblelist.Item, len(kc.AuthInfos))
-	pickedIndex := -1
-	for i := range kc.Clusters {
-		items[i] = ClusterItem{
-			Cluster: &kc.Clusters[i],
+	pickedItem := -1
+	for i := range kc.AuthInfos {
+		items[i] = UserItem{
+			User: &kc.AuthInfos[i],
 		}
 
-		if kc.Clusters[i].Name == kc.GetCurrentContext().Context.Cluster {
-			pickedIndex = i
+		if kc.AuthInfos[i].Name == kc.GetCurrentContext().Context.AuthInfo {
+			pickedItem = i
 		}
 	}
 
@@ -41,17 +41,17 @@ func NewModel(kc *kconf.KubeConfig, context string) (*Model, error) {
 	model.context = context
 
 	model.list = list.New(items, list.NewSimpleDelegate())
-	model.list.SetTitle(fmt.Sprintf("cluster for %s", context))
-	model.list.Pick(pickedIndex)
+	model.list.SetTitle(fmt.Sprintf("user for %s", context))
+	model.list.Pick(pickedItem)
 
 	model.list.SetKeys(list.KeyMap{
 		Pick: key.NewBinding(
 			key.WithKeys("enter"),
-			key.WithHelp("enter", "set cluster"),
+			key.WithHelp("enter", "set user"),
 		),
 		Rename: key.NewBinding(
 			key.WithKeys("r"),
-			key.WithHelp("r", "rename cluster"),
+			key.WithHelp("r", "rename user"),
 		),
 		SaveAndClose: key.NewBinding(
 			key.WithKeys("q"),
@@ -59,7 +59,7 @@ func NewModel(kc *kconf.KubeConfig, context string) (*Model, error) {
 		),
 		Close: key.NewBinding(
 			key.WithKeys("esc"),
-			key.WithHelp("esc", "quit without saving"),
+			key.WithHelp("esc", "exit"),
 		),
 	})
 
@@ -90,15 +90,15 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m *Model) onPicked(msg list.PickedMsg) tea.Cmd {
-	m.kconfig.ChangeCluster(m.context, msg.Picked)
+	m.kconfig.ChangeUser(m.context, msg.Picked)
 	m.kconfig.Save()
 	m.ExitMsg = msg
 	return tea.Quit
 }
 
 func (m *Model) onRename(msg list.RenameMsg) tea.Cmd {
-	userItem := msg.Selected.(ClusterItem)
-	m.kconfig.RenameCluster(userItem.Cluster.Name, msg.NewValue)
+	userItem := msg.Selected.(UserItem)
+	m.kconfig.RenameUser(userItem.User.Name, msg.NewValue)
 	return nil
 }
 

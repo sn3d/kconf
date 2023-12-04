@@ -18,8 +18,8 @@ func (k KeyMap) ShortHelp() []key.Binding {
 
 func (k KeyMap) FullHelp() [][]key.Binding {
 	return [][]key.Binding{
-		{k.Pick},
-		{k.Rename, k.ChangeNs, k.Delete},
+		{k.Pick, k.Rename, k.Delete},
+		{k.ChangeNs},
 		{k.SaveAndClose, k.Close},
 	}
 }

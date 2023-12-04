@@ -1,4 +1,4 @@
-package ctx
+package context
 
 import (
 	"fmt"
@@ -55,11 +55,11 @@ func NewModel(kc *kconf.KubeConfig) (*Model, error) {
 	model.list.SetKeys(list.KeyMap{
 		Pick: key.NewBinding(
 			key.WithKeys("enter"),
-			key.WithHelp("enter", "set default context"),
+			key.WithHelp("enter", "set default"),
 		),
 		ChangeNs: key.NewBinding(
 			key.WithKeys("n"),
-			key.WithHelp("n", "change namespace"),
+			key.WithHelp("n", "set default namespace"),
 		),
 		Rename: key.NewBinding(
 			key.WithKeys("r"),
@@ -75,7 +75,7 @@ func NewModel(kc *kconf.KubeConfig) (*Model, error) {
 		),
 		Close: key.NewBinding(
 			key.WithKeys("esc"),
-			key.WithHelp("esc", "quit without saving"),
+			key.WithHelp("esc", "exit"),
 		),
 	})
 
@@ -198,7 +198,7 @@ func (m *Model) onPickedContext(msg list.PickedMsg) tea.Cmd {
 
 func (m *Model) onRenamed(msg list.RenameMsg) tea.Cmd {
 	item := msg.Selected.(ContextItem)
-	m.kconfig.RenameContext(item.Context.Name, msg.NewValue)
+	m.kconfig.Rename(item.Context.Name, msg.NewValue)
 	return nil
 }
 

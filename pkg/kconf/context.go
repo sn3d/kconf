@@ -36,7 +36,7 @@ func (kc *KubeConfig) Rename(src, dest string) {
 	kc.RenameUser(ctx.Context.AuthInfo, dest)
 	ctx.Context.AuthInfo = dest
 
-	kc.RenameContext(src, dest)
+	kc.renameContext(src, dest)
 }
 
 // completely remove context by name and context's
@@ -82,9 +82,15 @@ func (kc *KubeConfig) removeFromContexts(name string) {
 	}
 }
 
-func (kc *KubeConfig) RenameContext(src, dest string) {
+// this function only rename the context. It's part of
+// Rename()
+func (kc *KubeConfig) renameContext(src, dest string) {
 	context := kc.GetContext(src)
 	if context != nil {
 		context.Name = dest
+	}
+
+	if kc.CurrentContext == src {
+		kc.CurrentContext = dest
 	}
 }
