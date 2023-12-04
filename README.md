@@ -15,6 +15,15 @@ The main vision of this tool is:
 - reduce need of editing kubeconfig YAML
 - usable for humans and scripts
 
+You can install `kconf` easily by running command:
+
+```
+brew install sn3d/tap/kconf
+```
+
+Or you can also use another installation method described in 
+[Installation section](#installation)
+
 ### Motivation
 
 Daily I work with several Kubernetes clusters. I need to be able quickly switch
