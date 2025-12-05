@@ -26,13 +26,16 @@ func NewModel(kc *kconf.KubeConfig, context string) (*Model, error) {
 	// convert clusters to items
 	items := make([]bubblelist.Item, len(kc.AuthInfos))
 	pickedIndex := -1
+	currentContext := kc.GetCurrentContext()
 	for i := range kc.Clusters {
 		items[i] = ClusterItem{
 			Cluster: &kc.Clusters[i],
 		}
 
-		if kc.Clusters[i].Name == kc.GetCurrentContext().Context.Cluster {
-			pickedIndex = i
+		if currentContext != nil {
+			if kc.Clusters[i].Name == currentContext.Context.Cluster {
+				pickedIndex = i
+			}
 		}
 	}
 
@@ -42,7 +45,11 @@ func NewModel(kc *kconf.KubeConfig, context string) (*Model, error) {
 
 	model.list = list.New(items, list.NewSimpleDelegate())
 	model.list.SetTitle(fmt.Sprintf("cluster for %s", context))
-	model.list.Pick(pickedIndex)
+
+	// some cluster is selected
+	if pickedIndex >= 0 {
+		model.list.Pick(pickedIndex)
+	}
 
 	model.list.SetKeys(list.KeyMap{
 		Pick: key.NewBinding(

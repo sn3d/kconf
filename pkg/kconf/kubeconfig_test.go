@@ -11,7 +11,8 @@ import (
 func Test_Open(t *testing.T) {
 	InitTestdata()
 
-	cfg, err := Open(Abs("open-test.yaml"))
+	cfgPath := Abs("open-test.yaml")
+	cfg, err := Open(cfgPath)
 	if err != nil {
 		t.FailNow()
 	}
